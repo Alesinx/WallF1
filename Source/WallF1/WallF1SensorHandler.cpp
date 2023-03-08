@@ -54,6 +54,7 @@ void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 	message.Topic = "tikonos/detector";
 	message.Message = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
@@ -68,7 +69,8 @@ void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 	FMqttMessage message;
 	message.Topic = "tikonos/detector";
 	message.Message = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
-
+	
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
@@ -99,6 +101,7 @@ void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 	message.Topic = "tikonos/detector";
 	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
@@ -114,6 +117,7 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 	message.Topic = "tikonos/detector";
 	message.Message = "{\"modo\":0,\"idSensor\":0}";
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
@@ -133,6 +137,7 @@ void UWallF1SensorHandler::TurnOnAllLeds()
 	message.Topic = "tikonos/detector";
 	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), DisplayColor.r, DisplayColor.g, DisplayColor.b);
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
@@ -148,11 +153,24 @@ void UWallF1SensorHandler::TurnOffAllLeds()
 	message.Topic = "tikonos/detector";
 	message.Message = "{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}";
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 }
 
 void UWallF1SensorHandler::SetDetectionColor(FWallF1SensorColor InColor)
 {
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized initialized"));
+		return;
+	}
+
+	FMqttMessage message;
+	message.Topic = "tikonos/detector";
+	message.Message = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), DisplayColor.r, DisplayColor.g, DisplayColor.b);
+
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
+	MqttClient->Publish(message);
 }
 
 void UWallF1SensorHandler::OnClientConnected()

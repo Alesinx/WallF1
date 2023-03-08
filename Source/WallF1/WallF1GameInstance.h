@@ -32,7 +32,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
 	UWallF1SensorHandler* GetSensorHandler() { return SensorHandler; }
 
+	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
+	TSubclassOf<UUserWidget> GetGameModeSelectionWidgetClass() { return GameModeSelectionWidgetClass; }
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
+	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
+
 protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> GameModeSelectionWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> InGameWidgetClass;
+
+	UPROPERTY()
 	UWallF1SensorHandler* SensorHandler;
 
 	UFUNCTION()

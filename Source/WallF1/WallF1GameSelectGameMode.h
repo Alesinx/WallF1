@@ -8,6 +8,8 @@
 #include "WallF1GameSelectGameMode.generated.h"
 
 class UUserWidget;
+class UWallF1GameInstance;
+class UWallF1SensorHandler;
 
 /**
  * 
@@ -20,10 +22,9 @@ class WALLF1_API AWallF1GameSelectGameMode : public AGameModeBase
 public:
 	virtual void StartPlay() override;
 
-protected:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> GameModeSelectionWidgetClass;
-
 private:
+	UWallF1GameInstance* CachedGameInstance;
+	UWallF1SensorHandler* CachedSensorHandler;
+
 	UUserWidget* GameModeSelectionWidget;
 };

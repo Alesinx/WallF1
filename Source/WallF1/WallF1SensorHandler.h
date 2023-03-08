@@ -75,7 +75,9 @@ public:
 	FOnSensorDetection OnSensorDetection;
 
 private:
+	UPROPERTY()
 	TScriptInterface<IMqttClientInterface> MqttClient;
+
 	FWallF1SensorColor DisplayColor;
 
 	FOnConnectDelegate ConnectDelegate;

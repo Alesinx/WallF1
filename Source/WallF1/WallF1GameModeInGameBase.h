@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "WallF1SensorHandler.h"
 #include "WallF1GameModeInGameBase.generated.h"
 
+class UUserWidget;
 class UWallF1GameInstance;
-class UWallF1SensorHandler;
 
 /**
  * Base clase for WallF1 games
@@ -16,33 +17,25 @@ UCLASS()
 class WALLF1_API AWallF1GameModeInGameBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
 public:
-	virtual void StartPlay() override;
-
-	virtual void OnCountdownStep();
-
-	virtual void StartGame();
+	AWallF1GameModeInGameBase();
 
 protected:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> GameModeSelectionWidgetClass;
-	
-	FTimerHandle GameStartCountdown;
-
-	uint8 Countdown = 5;
-
-	UWallF1GameInstance* CachedGameInstance; 
-	UWallF1SensorHandler* CachedSensorHandler;
-
 	uint16 Score = 0;
-
-	virtual void InitializeGameSensorDisplayColor();
+	FWallF1SensorColor SensorDisplayColor;
+	FWallF1SensorColor SensorDetectionColor;
+	
+	virtual void StartWallF1Game();
+	virtual void HandleSensorDetection(int sensorId);
 
 private:
-	UUserWidget* GameModeSelectionWidget;
+	UUserWidget* UIWidget;
+	UWallF1GameInstance* CachedGameInstance;
+	UWallF1SensorHandler* CachedSensorHandler;
+	uint8 Countdown = 5;
+	FTimerHandle GameStartCountdown;
 
-	UFUNCTION()
-	void DebugSensorDetection(int sensorId);
-
+	void StartPlay() override;
+	void OnCountdownStep();
+	void PlayCountdownAnimation();
 };
