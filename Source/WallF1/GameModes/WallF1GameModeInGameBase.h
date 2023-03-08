@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "WallF1SensorHandler.h"
+#include "../WallF1SensorHandler.h"
 #include "WallF1GameModeInGameBase.generated.h"
 
 class UUserWidget;

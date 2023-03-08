@@ -3,7 +3,7 @@
 
 
 #include "WallF1GameModeInGameBase.h"
-#include "WallF1GameInstance.h"
+#include "../WallF1GameInstance.h"
 #include "Math/UnrealMathUtility.h"
 #include "Blueprint/WidgetTree.h"
 
