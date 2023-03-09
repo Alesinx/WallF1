@@ -7,6 +7,7 @@
 #include "WallF1GameInstance.generated.h"
 
 class UWallF1SensorHandler;
+class ULevel;
 
 UENUM(BlueprintType)
 enum class EWallF1GameMode : uint8
@@ -29,13 +30,16 @@ class WALLF1_API UWallF1GameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
+	void LoadInGameLevel(EWallF1GameMode GameMode);
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
+	void LoadGameModeSelectionLevel();
+
 	UWallF1SensorHandler* GetSensorHandler() { return SensorHandler; }
 
-	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
 	TSubclassOf<UUserWidget> GetGameModeSelectionWidgetClass() { return GameModeSelectionWidgetClass; }
 
-	UFUNCTION(BlueprintCallable, Category = "WallF1 sensors")
 	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
 
 protected:
@@ -45,9 +49,25 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> InGameWidgetClass;
 
+	UPROPERTY(EditAnywhere)
+	FName GameModeSelectionLevelName;
+
+	UPROPERTY(EditAnywhere)
+	FName InGameLevelName;
+
+	UPROPERTY(EditAnywhere)
+	FString TopScoreGameModeURL;
+
+	UPROPERTY(EditAnywhere)
+	FString RandomGameModeURL;
+
+	UPROPERTY(EditAnywhere)
+	FString PuzzleGameModeURL;
+
+	UPROPERTY(EditAnywhere)
+	FString WallGameModeURL;
+
+private:
 	UPROPERTY()
 	UWallF1SensorHandler* SensorHandler;
-
-	UFUNCTION()
-	void DebugSensorDetection(int sensorId);
 };

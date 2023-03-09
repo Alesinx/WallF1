@@ -85,7 +85,6 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 	else
 	{
 		Countdown--;
-		// Update UI
 
 		switch (Countdown)
 		{
@@ -103,7 +102,7 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 			break;
 		}
 
-		OnCountdownStep(Countdown);
+		OnCountdownUpdate.Broadcast(Countdown);
 	}
 }
 

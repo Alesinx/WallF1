@@ -7,6 +7,8 @@
 #include "../WallF1SensorHandler.h"
 #include "WallF1GameModeInGameBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownUpdate, uint8, CurrentCountdown);
+
 class UUserWidget;
 class UWallF1GameInstance;
 
@@ -20,8 +22,8 @@ class WALLF1_API AWallF1GameModeInGameBase : public AGameModeBase
 public:
 	AWallF1GameModeInGameBase();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnCountdownStep(uint8 CurrentCountdown);
+	UPROPERTY(BlueprintAssignable)
+	FOnCountdownUpdate OnCountdownUpdate;
 
 protected:
 	uint16 Score = 0;
