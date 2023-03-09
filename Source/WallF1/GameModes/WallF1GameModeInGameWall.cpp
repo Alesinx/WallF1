@@ -2,15 +2,18 @@
 
 
 #include "WallF1GameModeInGameWall.h"
+#include "../WallF1GameInstance.h"
 
-AWallF1GameModeInGameWall::AWallF1GameModeInGameWall()
+AWallF1GameModeInGameWall::AWallF1GameModeInGameWall() : Super()
 {
+	bGameModeInGame = true;
 }
 
 void AWallF1GameModeInGameWall::StartWallF1Game()
 {
+	UE_LOG(LogTemp, Display, TEXT("WALL GAME MODE STARTED"));
 }
 
-void AWallF1GameModeInGameWall::HandleSensorDetection(int sensorId)
+void AWallF1GameModeInGameWall::HandleSensorDetection(int SensorId)
 {
 }

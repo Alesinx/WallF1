@@ -20,6 +20,9 @@ AWallF1GameModeInGameBase::AWallF1GameModeInGameBase()
 
 void AWallF1GameModeInGameBase::StartPlay()
 {
+	Super::StartPlay();
+
+	// Set cached references
 	CachedGameInstance = GetGameInstance<UWallF1GameInstance>();
 	if (!CachedGameInstance)
 		UE_LOG(LogTemp, Fatal, TEXT("Could not get WallF1 game instance"));
@@ -28,16 +31,25 @@ void AWallF1GameModeInGameBase::StartPlay()
 	if (!CachedSensorHandler)
 		UE_LOG(LogTemp, Fatal, TEXT("CachedSensorHandler is null"));
 
-	// Create in-game widget
-	if (CachedGameInstance->GetInGameWidgetClass())
-	{
-		UIWidget = CreateWidget(GetWorld(), CachedGameInstance->GetInGameWidgetClass(), FName("UI Widget"));
-		UIWidget->AddToViewport();
-	}
+	// Bind handle sensor detection
+	CachedSensorHandler->OnSensorDetection.AddDynamic(this, &AWallF1GameModeInGameBase::HandleSensorDetection);
+
+	// Create UI widget
+	if (bGameModeInGame)
+		UIWidgetClass = CachedGameInstance->GetInGameWidgetClass();
 	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Could not create UI widget. UI widget class reference was null"));
-	}
+		UIWidgetClass = CachedGameInstance->GetGameModeSelectionWidgetClass();
+
+	if (!UIWidgetClass)
+		UE_LOG(LogTemp, Fatal, TEXT("Could not create UI widget. UI widget class reference was null"));
+
+	UIWidget = CreateWidget(GetWorld(), UIWidgetClass, FName("UI Widget"));
+	UIWidget->AddToViewport();
+
+	if (bGameModeInGame)
+		PlayCountdownAnimation();
+	else
+		StartGameModeSelection();
 }
 
 void AWallF1GameModeInGameBase::PlayCountdownAnimation()
@@ -49,13 +61,22 @@ void AWallF1GameModeInGameBase::PlayCountdownAnimation()
 
 	CachedSensorHandler->SetDisplayColor(SensorColor);
 
-	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::OnCountdownStep, 1, true);
+	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1, true);
 }
 
-void AWallF1GameModeInGameBase::OnCountdownStep()
+void AWallF1GameModeInGameBase::StartGameModeSelection()
+{
+	UE_LOG(LogTemp, Display, TEXT("GAME MODE SELECTION STARTED"));
+
+	CachedSensorHandler->DisableAllSensorsDetection();
+	CachedSensorHandler->TurnOffAllLeds();
+}
+
+void AWallF1GameModeInGameBase::HandleCountdownStep()
 {
 	if (Countdown <= 0)
 	{
+		// Begin
 		GetWorld()->GetTimerManager().ClearTimer(GameStartCountdown);
 		CachedSensorHandler->SetDisplayColor(SensorDisplayColor);
 		CachedSensorHandler->SetDetectionColor(SensorDetectionColor);
@@ -81,27 +102,15 @@ void AWallF1GameModeInGameBase::OnCountdownStep()
 			CachedSensorHandler->TurnOffAllLeds();
 			break;
 		}
+
+		OnCountdownStep(Countdown);
 	}
 }
 
 void AWallF1GameModeInGameBase::StartWallF1Game()
 {
-	UE_LOG(LogTemp, Display, TEXT("GAME STARTED"));
-
-	int RndSensor = FMath::RandRange(1, 9);
-	CachedSensorHandler->EnableSensorDetection(RndSensor);
-
-	CachedSensorHandler->OnSensorDetection.AddDynamic(this, &AWallF1GameModeInGameBase::HandleSensorDetection);
 }
 
 void AWallF1GameModeInGameBase::HandleSensorDetection(int SensorId)
 {
-	UE_LOG(LogTemp, Display, TEXT("DETECTION ON SENSOR WITH ID: %i"), SensorId);
-
-	UE_LOG(LogTemp, Display, TEXT("Disabling detection on sensor: %i"), SensorId + 1);
-	CachedSensorHandler->DisableSensorDetection(SensorId + 1);
-
-	int RndSensor = FMath::RandRange(1, 9);
-	UE_LOG(LogTemp, Display, TEXT("Enabling detection on sensor: %i"), RndSensor);
-	CachedSensorHandler->EnableSensorDetection(RndSensor);
 }

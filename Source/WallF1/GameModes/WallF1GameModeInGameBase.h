@@ -20,22 +20,32 @@ class WALLF1_API AWallF1GameModeInGameBase : public AGameModeBase
 public:
 	AWallF1GameModeInGameBase();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnCountdownStep(uint8 CurrentCountdown);
+
 protected:
 	uint16 Score = 0;
 	FWallF1SensorColor SensorDisplayColor;
 	FWallF1SensorColor SensorDetectionColor;
+	TSubclassOf<UUserWidget> UIWidgetClass;
+	UWallF1GameInstance* CachedGameInstance;
+	UWallF1SensorHandler* CachedSensorHandler;
+	bool bGameModeInGame = false;
 	
 	virtual void StartWallF1Game();
-	virtual void HandleSensorDetection(int sensorId);
+
+	UFUNCTION()
+	virtual void HandleSensorDetection(int SensorId);
 
 private:
 	UUserWidget* UIWidget;
-	UWallF1GameInstance* CachedGameInstance;
-	UWallF1SensorHandler* CachedSensorHandler;
 	uint8 Countdown = 5;
 	FTimerHandle GameStartCountdown;
 
 	void StartPlay() override;
-	void OnCountdownStep();
 	void PlayCountdownAnimation();
+	void StartGameModeSelection();
+
+	UFUNCTION()
+	void HandleCountdownStep();
 };

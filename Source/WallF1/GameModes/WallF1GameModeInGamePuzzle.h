@@ -16,6 +16,6 @@ class WALLF1_API AWallF1GameModeInGamePuzzle : public AWallF1GameModeInGameBase
 
 	AWallF1GameModeInGamePuzzle();
 
-	void StartWallF1Game();
-	void HandleSensorDetection(int sensorId);
+	void StartWallF1Game() override;
+	void HandleSensorDetection(int SensorId) override;
 };

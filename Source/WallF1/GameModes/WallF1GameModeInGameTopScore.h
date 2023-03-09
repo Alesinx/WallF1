@@ -16,6 +16,6 @@ class WALLF1_API AWallF1GameModeInGameTopScore : public AWallF1GameModeInGameBas
 
 	AWallF1GameModeInGameTopScore();
 
-	void StartWallF1Game();
-	void HandleSensorDetection(int sensorId);
+	void StartWallF1Game() override;
+	void HandleSensorDetection(int SensorId) override;
 };
