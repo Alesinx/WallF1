@@ -18,7 +18,6 @@ enum class EWallF1GameMode : uint8
 	WALL = 3,
 };
 
-
 /**
  * WallF1 Game Instance.
  */
@@ -41,6 +40,16 @@ public:
 	TSubclassOf<UUserWidget> GetGameModeSelectionWidgetClass() { return GameModeSelectionWidgetClass; }
 
 	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
+
+	TArray<uint16> GetGameModeRanking(EWallF1GameMode GameMode);
+
+	/// <summary>
+	/// Checks the new score and update the game mode ranking if needed
+	/// </summary>
+	/// <param name="GameMode"></param>
+	/// <param name="InScore"></param>
+	/// <returns>True if new score entered the ranking. False is the score was ignored </returns>
+	bool AddNewGameScore(EWallF1GameMode GameMode, uint16 InScore);
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -68,6 +77,20 @@ protected:
 	FString WallGameModeURL;
 
 private:
+	uint8 MaxRankingSize = 5;
+
 	UPROPERTY()
 	UWallF1SensorHandler* SensorHandler;
+
+	UPROPERTY()
+	TArray<uint16> TopScoreGameModeScoreRanking;
+
+	UPROPERTY()
+	TArray<uint16> RandomGameModeScoreRanking;
+
+	UPROPERTY()
+	TArray<uint16> PuzzleGameModeScoreRanking;
+
+	UPROPERTY()
+	TArray<uint16> WallGameModeScoreRanking;
 };
