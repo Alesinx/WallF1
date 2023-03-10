@@ -23,5 +23,5 @@ struct MQTTUTILITIES_API FMqttMessage
 
     /** Quality of signal. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MQTT")
-	int Qos = 0;
+	int Qos = 2;
 };

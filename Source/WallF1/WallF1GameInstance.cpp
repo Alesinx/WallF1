@@ -44,7 +44,7 @@ void UWallF1GameInstance::LoadGameModeSelectionLevel()
 	UGameplayStatics::OpenLevel(this, GameModeSelectionLevelName);
 }
 
-TArray<uint16> UWallF1GameInstance::GetGameModeRanking(EWallF1GameMode GameMode)
+const TArray<int>& UWallF1GameInstance::GetGameModeRanking(EWallF1GameMode GameMode)
 {
 	switch(GameMode)
 	{
@@ -57,11 +57,14 @@ TArray<uint16> UWallF1GameInstance::GetGameModeRanking(EWallF1GameMode GameMode)
 	case EWallF1GameMode::WALL:
 		return WallGameModeScoreRanking;
 	}
+
+	UE_LOG(LogTemp, Fatal, TEXT("Could not find score ranking array for specified EWallF1GameMode. Did you add a new game mode and forgot to add a case to the switch?"));
+	return TopScoreGameModeScoreRanking;
 }
 
-bool UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, uint16 InScore)
+bool UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
 {
-	TArray<uint16>* TargetScoreArray;
+	TArray<int>* TargetScoreArray;
 	switch (GameMode)
 	{
 	case EWallF1GameMode::TOP_SCORE:
@@ -76,10 +79,10 @@ bool UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, uint16 InSco
 	case EWallF1GameMode::WALL:
 		TargetScoreArray = &WallGameModeScoreRanking;
 		break;
+	default:
+		UE_LOG(LogTemp, Fatal, TEXT("Could not find TargetArray. Did you add a new game mode and forgot to add a case to the switch?"))
+		return false;
 	}
-
-	if(!TargetScoreArray)
-		UE_LOG(LogTemp, Error, TEXT("Could not find TargetArray. Did you add a new game mode and forgot to add a case to the switch?"))
 
 	if(TargetScoreArray->Num() < MaxRankingSize)
 	{

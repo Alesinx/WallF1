@@ -54,12 +54,12 @@ void AWallF1GameModeInGameBase::StartPlay()
 
 void AWallF1GameModeInGameBase::PlayCountdownAnimation()
 {
-	FWallF1SensorColor Red;
-	Red.r = 255;
-	Red.g = 0;
-	Red.b = 0;
+	FWallF1SensorColor SensorColor;
+	SensorColor.r = 255;
+	SensorColor.g = 0;
+	SensorColor.b = 0;
 
-	CachedSensorHandler->SetDisplayColor(Red);
+	CachedSensorHandler->SetDisplayColor(SensorColor);
 
 	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1, true);
 }

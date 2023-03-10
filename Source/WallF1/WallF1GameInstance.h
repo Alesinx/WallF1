@@ -41,7 +41,8 @@ public:
 
 	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
 
-	TArray<uint16> GetGameModeRanking(EWallF1GameMode GameMode);
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
+	const TArray<int>& GetGameModeRanking(EWallF1GameMode GameMode);
 
 	/// <summary>
 	/// Checks the new score and update the game mode ranking if needed
@@ -49,7 +50,7 @@ public:
 	/// <param name="GameMode"></param>
 	/// <param name="InScore"></param>
 	/// <returns>True if new score entered the ranking. False is the score was ignored </returns>
-	bool AddNewGameScore(EWallF1GameMode GameMode, uint16 InScore);
+	bool AddNewGameScore(EWallF1GameMode GameMode, int InScore);
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -83,14 +84,14 @@ private:
 	UWallF1SensorHandler* SensorHandler;
 
 	UPROPERTY()
-	TArray<uint16> TopScoreGameModeScoreRanking;
+	TArray<int> TopScoreGameModeScoreRanking;
 
 	UPROPERTY()
-	TArray<uint16> RandomGameModeScoreRanking;
+	TArray<int> RandomGameModeScoreRanking;
 
 	UPROPERTY()
-	TArray<uint16> PuzzleGameModeScoreRanking;
+	TArray<int> PuzzleGameModeScoreRanking;
 
 	UPROPERTY()
-	TArray<uint16> WallGameModeScoreRanking;
+	TArray<int> WallGameModeScoreRanking;
 };
