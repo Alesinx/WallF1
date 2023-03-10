@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "../WallF1GameInstance.h"
 #include "../WallF1SensorHandler.h"
 #include "WallF1GameModeInGameBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownUpdate, uint8, CurrentCountdown);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOver);
 
 class UUserWidget;
-class UWallF1GameInstance;
 
 /**
  * Base clase for WallF1 games
@@ -25,15 +26,28 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCountdownUpdate OnCountdownUpdate;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnGameOver OnGameOver;
+
+	UPROPERTY(BlueprintReadOnly)
+	EWallF1GameMode WallF1GameMode = EWallF1GameMode::NONE;
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Mode")
+	const int GetScore() const { return Score; }
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Mode")
+	const int GetRankingPosition() const { return RankingPosition; }
+
 protected:
-	uint16 Score = 0;
+	int Score = 0;
+	int RankingPosition = -1;
 	FWallF1SensorColor SensorDisplayColor;
 	FWallF1SensorColor SensorDetectionColor;
 	TSubclassOf<UUserWidget> UIWidgetClass;
 	UWallF1GameInstance* CachedGameInstance;
 	UWallF1SensorHandler* CachedSensorHandler;
-	bool bGameModeInGame = false;
 	
+	UFUNCTION()
 	virtual void StartWallF1Game();
 
 	UFUNCTION()
@@ -43,10 +57,12 @@ private:
 	UUserWidget* UIWidget;
 	uint8 Countdown = 5;
 	FTimerHandle GameStartCountdown;
+	FTimerHandle GameOverTimer;
 
 	void StartPlay() override;
 	void PlayCountdownAnimation();
 	void StartGameModeSelection();
+	void GameOver();
 
 	UFUNCTION()
 	void HandleCountdownStep();

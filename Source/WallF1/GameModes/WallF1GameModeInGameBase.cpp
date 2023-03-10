@@ -35,10 +35,11 @@ void AWallF1GameModeInGameBase::StartPlay()
 	CachedSensorHandler->OnSensorDetection.AddDynamic(this, &AWallF1GameModeInGameBase::HandleSensorDetection);
 
 	// Create UI widget
-	if (bGameModeInGame)
-		UIWidgetClass = CachedGameInstance->GetInGameWidgetClass();
-	else
+	if (WallF1GameMode == EWallF1GameMode::NONE)
 		UIWidgetClass = CachedGameInstance->GetGameModeSelectionWidgetClass();
+	else
+		UIWidgetClass = CachedGameInstance->GetInGameWidgetClass();
+		
 
 	if (!UIWidgetClass)
 		UE_LOG(LogTemp, Fatal, TEXT("Could not create UI widget. UI widget class reference was null"));
@@ -46,10 +47,10 @@ void AWallF1GameModeInGameBase::StartPlay()
 	UIWidget = CreateWidget(GetWorld(), UIWidgetClass, FName("UI Widget"));
 	UIWidget->AddToViewport();
 
-	if (bGameModeInGame)
-		PlayCountdownAnimation();
-	else
+	if (WallF1GameMode == EWallF1GameMode::NONE)
 		StartGameModeSelection();
+	else
+		PlayCountdownAnimation();
 }
 
 void AWallF1GameModeInGameBase::PlayCountdownAnimation()
@@ -61,7 +62,7 @@ void AWallF1GameModeInGameBase::PlayCountdownAnimation()
 
 	CachedSensorHandler->SetDisplayColor(Red);
 
-	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1, true);
+	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1 , true);
 }
 
 void AWallF1GameModeInGameBase::StartGameModeSelection()
@@ -72,6 +73,13 @@ void AWallF1GameModeInGameBase::StartGameModeSelection()
 	CachedSensorHandler->TurnOffAllLeds();
 }
 
+void AWallF1GameModeInGameBase::GameOver()
+{
+	UE_LOG(LogTemp, Display, TEXT("GAME OVER"));
+	RankingPosition = CachedGameInstance->AddNewGameScore(WallF1GameMode, Score);
+	OnGameOver.Broadcast();
+}
+
 void AWallF1GameModeInGameBase::HandleCountdownStep()
 {
 	if (Countdown <= 0)
@@ -80,6 +88,7 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 		GetWorld()->GetTimerManager().ClearTimer(GameStartCountdown);
 		CachedSensorHandler->SetDisplayColor(SensorDisplayColor);
 		CachedSensorHandler->SetDetectionColor(SensorDetectionColor);
+		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::GameOver, CachedGameInstance->GetGameDurationInSeconds(), false);
 		StartWallF1Game();
 	}
 	else
@@ -108,8 +117,10 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 
 void AWallF1GameModeInGameBase::StartWallF1Game()
 {
+	UE_LOG(LogTemp, Fatal, TEXT("StartWallF1Game should never be called in in-game mode base"));
 }
 
 void AWallF1GameModeInGameBase::HandleSensorDetection(int SensorId)
 {
+	UE_LOG(LogTemp, Fatal, TEXT("HandleSensorDetection should never be called in in-game mode base"));
 }

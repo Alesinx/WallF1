@@ -62,7 +62,7 @@ const TArray<int>& UWallF1GameInstance::GetGameModeRanking(EWallF1GameMode GameM
 	return TopScoreGameModeScoreRanking;
 }
 
-bool UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
+int UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
 {
 	TArray<int>* TargetScoreArray;
 	switch (GameMode)
@@ -81,25 +81,38 @@ bool UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
 		break;
 	default:
 		UE_LOG(LogTemp, Fatal, TEXT("Could not find TargetArray. Did you add a new game mode and forgot to add a case to the switch?"))
-		return false;
+		return -1;
+	}
+
+	// If ranking is empty just add it the new score
+	// If the new score if greater than any of the ranking scores, 
+	//     if it, insert it before it, then, if Num > MaxRanking size, trim the array to MaxRankingSize
+	//     if it's not, add it only if Num < MaxRankingSize
+	// Else ignore this score
+	if(TargetScoreArray->IsEmpty())
+	{
+		TargetScoreArray->Add(InScore);
+		return 0;
+	}
+
+	for (int i = 0; i < TargetScoreArray->Num(); i++)
+	{
+		if (InScore > (*TargetScoreArray)[i])
+		{
+			TargetScoreArray->Insert(InScore, i);
+			if(TargetScoreArray->Num() > MaxRankingSize)
+			{
+				TargetScoreArray->RemoveAt(MaxRankingSize);
+			}
+			return i;
+		}
 	}
 
 	if(TargetScoreArray->Num() < MaxRankingSize)
 	{
 		TargetScoreArray->Add(InScore);
-		return true;
+		return TargetScoreArray->Num() - 1;
 	}
-	else
-	{
-		for(int i = 0; i < MaxRankingSize; ++i)
-		{
-			if(InScore > (*TargetScoreArray)[i])
-			{
-				(*TargetScoreArray)[i] = InScore;
-				return true;
-			}
-		}
-
-		return false;
-	}
+	
+	return -1;
 }

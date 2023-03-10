@@ -12,10 +12,11 @@ class ULevel;
 UENUM(BlueprintType)
 enum class EWallF1GameMode : uint8
 {
-	TOP_SCORE = 0,
-	RANDOM = 1,
-	PUZZLE = 2,
-	WALL = 3,
+	NONE = 0,
+	TOP_SCORE = 1,
+	RANDOM = 2,
+	PUZZLE = 3,
+	WALL = 4,
 };
 
 /**
@@ -35,22 +36,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
 	void LoadGameModeSelectionLevel();
 
+	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
+	const TArray<int>& GetGameModeRanking(EWallF1GameMode GameMode);
+
+	int GetGameDurationInSeconds() { return GameDurationInSeconds; }
+
 	UWallF1SensorHandler* GetSensorHandler() { return SensorHandler; }
 
 	TSubclassOf<UUserWidget> GetGameModeSelectionWidgetClass() { return GameModeSelectionWidgetClass; }
 
 	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
 
-	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
-	const TArray<int>& GetGameModeRanking(EWallF1GameMode GameMode);
-
 	/// <summary>
 	/// Checks the new score and update the game mode ranking if needed
 	/// </summary>
 	/// <param name="GameMode"></param>
 	/// <param name="InScore"></param>
-	/// <returns>True if new score entered the ranking. False is the score was ignored </returns>
-	bool AddNewGameScore(EWallF1GameMode GameMode, int InScore);
+	/// <returns> Ranking position if new score entered in it, -1 otherwise </returns>
+	int AddNewGameScore(EWallF1GameMode GameMode, int InScore);
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -78,7 +81,7 @@ protected:
 	FString WallGameModeURL;
 
 private:
-	uint8 MaxRankingSize = 5;
+	int MaxRankingSize = 5;
 
 	UPROPERTY()
 	UWallF1SensorHandler* SensorHandler;
@@ -94,4 +97,7 @@ private:
 
 	UPROPERTY()
 	TArray<int> WallGameModeScoreRanking;
+
+	UPROPERTY()
+	int GameDurationInSeconds = 15;
 };

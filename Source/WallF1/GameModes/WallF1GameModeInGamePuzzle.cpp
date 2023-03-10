@@ -6,7 +6,7 @@
 
 AWallF1GameModeInGamePuzzle::AWallF1GameModeInGamePuzzle() : Super()
 {
-	bGameModeInGame = true;
+	WallF1GameMode = EWallF1GameMode::PUZZLE;
 }
 
 void AWallF1GameModeInGamePuzzle::StartWallF1Game()

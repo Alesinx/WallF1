@@ -123,6 +123,18 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 
 void UWallF1SensorHandler::DisableAllSensorsDetection()
 {
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized initialized"));
+		return;
+	}
+
+	FMqttMessage message;
+	message.Topic = "tikonos/detector";
+	message.Message = "{\"modo\":1,\"idSensor\":0}";
+
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
+	MqttClient->Publish(message);
 }
 
 void UWallF1SensorHandler::TurnOnAllLeds()

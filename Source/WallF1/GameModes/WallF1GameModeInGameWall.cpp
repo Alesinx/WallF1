@@ -6,7 +6,7 @@
 
 AWallF1GameModeInGameWall::AWallF1GameModeInGameWall() : Super()
 {
-	bGameModeInGame = true;
+	WallF1GameMode = EWallF1GameMode::WALL;
 }
 
 void AWallF1GameModeInGameWall::StartWallF1Game()

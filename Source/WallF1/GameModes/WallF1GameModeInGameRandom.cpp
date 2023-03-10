@@ -6,7 +6,7 @@
 
 AWallF1GameModeInGameRandom::AWallF1GameModeInGameRandom() : Super()
 {
-	bGameModeInGame = true;
+	WallF1GameMode = EWallF1GameMode::RANDOM;
 }
 
 void AWallF1GameModeInGameRandom::StartWallF1Game()
