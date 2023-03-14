@@ -11,6 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownUpdate, uint8, CurrentCountdown);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnScoreIncreased);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStandBy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeviceActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOver);
 
 class UUserWidget;
@@ -30,6 +31,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStandBy OnStandBy;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnDeviceActive OnDeviceActive;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCountdownUpdate OnCountdownUpdate;

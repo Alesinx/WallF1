@@ -28,6 +28,9 @@ struct WALLF1_API FWallF1Config
 
 	UPROPERTY()
 	int GameDurationInSeconds = 30;
+
+	UPROPERTY()
+	int StandByTimerInSeconds = 60;
 };
 
 UENUM(BlueprintType)
@@ -49,6 +52,10 @@ class WALLF1_API UWallF1GameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	
+	UPROPERTY()
+	bool bShowStandbyScreenOnGameModeSelectLoad = true;
+
 	virtual void Init() override;
 
 	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")

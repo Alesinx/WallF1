@@ -3,7 +3,7 @@
 
 
 #include "WallF1GameModeInGameBase.h"
-//#include "../WallF1PlayerController.h"
+#include "../WallF1PlayerController.h"
 #include "../WallF1GameInstance.h"
 #include "Math/UnrealMathUtility.h"
 #include "Blueprint/WidgetTree.h"
@@ -18,7 +18,7 @@ AWallF1GameModeInGameBase::AWallF1GameModeInGameBase()
 	SensorDetectionColor.g = 255;
 	SensorDetectionColor.b = 0;
 
-	//PlayerControllerClass = AWallF1PlayerController::StaticClass();
+	PlayerControllerClass = AWallF1PlayerController::StaticClass();
 }
 
 void AWallF1GameModeInGameBase::StartPlay()
@@ -72,10 +72,16 @@ void AWallF1GameModeInGameBase::StartGameModeSelection()
 {
 	UE_LOG(LogTemp, Display, TEXT("GAME MODE SELECTION STARTED"));
 
-	ResetStandbyTimer();
-
 	CachedSensorHandler->DisableAllSensorsDetection();
 	CachedSensorHandler->TurnOffAllLeds();
+
+	if(CachedGameInstance->bShowStandbyScreenOnGameModeSelectLoad)
+	{
+		ShowStandyByScreen();
+
+		// Don't show stand-by screen next time game selection is loaded
+		CachedGameInstance->bShowStandbyScreenOnGameModeSelectLoad = false;
+	}
 }
 
 void AWallF1GameModeInGameBase::GameOver()
@@ -130,8 +136,11 @@ void AWallF1GameModeInGameBase::ResetStandbyTimer()
 {
 	if (WallF1GameMode == EWallF1GameMode::NONE)
 	{
+		OnDeviceActive.Broadcast();
 		GetWorld()->GetTimerManager().ClearTimer(StandByTimer);
-		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::ShowStandyByScreen, 10, false);
+
+		int StandByTimerInSeconds = CachedGameInstance->GetWallF1Config().StandByTimerInSeconds;
+		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::ShowStandyByScreen, StandByTimerInSeconds, false);
 	}
 }
 
