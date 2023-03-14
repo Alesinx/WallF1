@@ -9,6 +9,27 @@
 class UWallF1SensorHandler;
 class ULevel;
 
+USTRUCT()
+struct WALLF1_API FWallF1Config
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Host;
+
+	UPROPERTY()
+	int Port;
+
+	UPROPERTY()
+	FString TopicToPublishIn;
+
+	UPROPERTY()
+	FString TopicToSubscribeTo;
+
+	UPROPERTY()
+	int GameDurationInSeconds = 30;
+};
+
 UENUM(BlueprintType)
 enum class EWallF1GameMode : uint8
 {
@@ -39,13 +60,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
 	const TArray<int>& GetGameModeRanking(EWallF1GameMode GameMode);
 
-	int GetGameDurationInSeconds() { return GameDurationInSeconds; }
-
 	UWallF1SensorHandler* GetSensorHandler() { return SensorHandler; }
 
 	TSubclassOf<UUserWidget> GetGameModeSelectionWidgetClass() { return GameModeSelectionWidgetClass; }
 
 	TSubclassOf<UUserWidget> GetInGameWidgetClass() { return InGameWidgetClass; }
+
+	const FWallF1Config GetWallF1Config() { return WallF1Config; }
 
 	/// <summary>
 	/// Checks the new score and update the game mode ranking if needed
@@ -98,6 +119,7 @@ private:
 	UPROPERTY()
 	TArray<int> WallGameModeScoreRanking;
 
-	UPROPERTY()
-	int GameDurationInSeconds = 15;
+	void LoadConfigFile(FWallF1Config& WallF1Config);
+
+	FWallF1Config WallF1Config;
 };

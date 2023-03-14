@@ -12,8 +12,18 @@ AWallF1GameModeInGameWall::AWallF1GameModeInGameWall() : Super()
 void AWallF1GameModeInGameWall::StartWallF1Game()
 {
 	UE_LOG(LogTemp, Display, TEXT("WALL GAME MODE STARTED"));
+
+	CachedSensorHandler->EnableAllSensorsDetection();
 }
 
 void AWallF1GameModeInGameWall::HandleSensorDetection(int SensorId)
 {
+	IncreaseScore(1);
+	CachedSensorHandler->DisableSensorDetection(SensorId + 1);
+
+	if(CachedSensorHandler->AreAllSensorsOff())
+	{
+		IncreaseScore(5);
+		CachedSensorHandler->EnableAllSensorsDetection();
+	}
 }

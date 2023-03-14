@@ -21,7 +21,7 @@ void AWallF1GameModeInGameRandom::HandleSensorDetection(int SensorId)
 {
 	UE_LOG(LogTemp, Display, TEXT("DETECTION ON SENSOR WITH ID: %i"), SensorId);
 
-	Score++;
+	IncreaseScore(1);
 
 	UE_LOG(LogTemp, Display, TEXT("Disabling detection on sensor: %i"), SensorId + 1);
 	CachedSensorHandler->DisableSensorDetection(SensorId + 1);

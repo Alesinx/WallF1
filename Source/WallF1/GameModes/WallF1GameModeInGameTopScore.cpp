@@ -11,13 +11,6 @@ AWallF1GameModeInGameTopScore::AWallF1GameModeInGameTopScore() : Super()
 
 void AWallF1GameModeInGameTopScore::StartWallF1Game()
 {
-	UE_LOG(LogTemp, Display, TEXT("TOP-SCORE GAME MODE STARTED"));
-
-	CachedGameInstance->AddNewGameScore(WallF1GameMode, 10);
-	CachedGameInstance->AddNewGameScore(WallF1GameMode, 9);
-	CachedGameInstance->AddNewGameScore(WallF1GameMode, 11);
-	CachedGameInstance->AddNewGameScore(WallF1GameMode, 8);
-	Score = 15;
 }
 
 void AWallF1GameModeInGameTopScore::HandleSensorDetection(int SensorId)

@@ -13,7 +13,8 @@ UCLASS()
 class WALLF1_API AWallF1GameModeInGameWall : public AWallF1GameModeInGameBase
 {
 	GENERATED_BODY()
-	
+
+public:	
 	AWallF1GameModeInGameWall();
 
 	void StartWallF1Game() override;

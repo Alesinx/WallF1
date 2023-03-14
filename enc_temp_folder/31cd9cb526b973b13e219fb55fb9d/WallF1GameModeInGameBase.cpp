@@ -3,7 +3,6 @@
 
 
 #include "WallF1GameModeInGameBase.h"
-//#include "../WallF1PlayerController.h"
 #include "../WallF1GameInstance.h"
 #include "Math/UnrealMathUtility.h"
 #include "Blueprint/WidgetTree.h"
@@ -17,8 +16,6 @@ AWallF1GameModeInGameBase::AWallF1GameModeInGameBase()
 	SensorDetectionColor.r = 0;
 	SensorDetectionColor.g = 255;
 	SensorDetectionColor.b = 0;
-
-	//PlayerControllerClass = AWallF1PlayerController::StaticClass();
 }
 
 void AWallF1GameModeInGameBase::StartPlay()
@@ -72,8 +69,6 @@ void AWallF1GameModeInGameBase::StartGameModeSelection()
 {
 	UE_LOG(LogTemp, Display, TEXT("GAME MODE SELECTION STARTED"));
 
-	ResetStandbyTimer();
-
 	CachedSensorHandler->DisableAllSensorsDetection();
 	CachedSensorHandler->TurnOffAllLeds();
 }
@@ -83,12 +78,6 @@ void AWallF1GameModeInGameBase::GameOver()
 	UE_LOG(LogTemp, Display, TEXT("GAME OVER"));
 	RankingPosition = CachedGameInstance->AddNewGameScore(WallF1GameMode, Score);
 	OnGameOver.Broadcast();
-}
-
-void AWallF1GameModeInGameBase::ShowStandyByScreen()
-{
-	if(WallF1GameMode == EWallF1GameMode::NONE)
-		OnStandBy.Broadcast();
 }
 
 void AWallF1GameModeInGameBase::HandleCountdownStep()
@@ -121,17 +110,8 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 			CachedSensorHandler->TurnOffAllLeds();
 			break;
 		}
-	}
 
-	OnCountdownUpdate.Broadcast(CountdownLeft);
-}
-
-void AWallF1GameModeInGameBase::ResetStandbyTimer()
-{
-	if (WallF1GameMode == EWallF1GameMode::NONE)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(StandByTimer);
-		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::ShowStandyByScreen, 10, false);
+		OnCountdownUpdate.Broadcast(CountdownLeft);
 	}
 }
 

@@ -1,0 +1,7 @@
+{
+	"Host" : "test.mosquitto.org",
+    "Port" : 1883,
+    "TopicToPublishIn" : "tikonos/detector",
+    "TopicToSubscribeTo" : "tikonos/visualizer",
+    "GameDurationInSeconds" : 120
+}

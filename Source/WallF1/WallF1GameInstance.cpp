@@ -5,14 +5,18 @@
 #include "WallF1SensorHandler.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Level.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/JsonSerializer.h"
+#include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
 
 void UWallF1GameInstance::Init()
 {
 	Super::Init();
 
-	SensorHandler = NewObject<UWallF1SensorHandler>();
+	LoadConfigFile(WallF1Config);
 
-	SensorHandler->Initialize();
+	SensorHandler = NewObject<UWallF1SensorHandler>();
+	SensorHandler->Initialize(WallF1Config);
 }
 
 void UWallF1GameInstance::LoadInGameLevel(EWallF1GameMode GameMode)
@@ -83,22 +87,20 @@ int UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
 		UE_LOG(LogTemp, Fatal, TEXT("Could not find TargetArray. Did you add a new game mode and forgot to add a case to the switch?"))
 		return -1;
 	}
-
+	
 	// If ranking is empty just add it the new score
-	// If the new score if greater than any of the ranking scores, 
-	//     if it, insert it before it, then, if Num > MaxRanking size, trim the array to MaxRankingSize
-	//     if it's not, add it only if Num < MaxRankingSize
-	// Else ignore this score
 	if(TargetScoreArray->IsEmpty())
 	{
 		TargetScoreArray->Add(InScore);
 		return 0;
 	}
 
+	// If the new score if greater than any of the ranking scores, 
 	for (int i = 0; i < TargetScoreArray->Num(); i++)
 	{
 		if (InScore > (*TargetScoreArray)[i])
 		{
+			// If it is, insert it, then, if Num > MaxRanking size, trim the array to MaxRankingSize
 			TargetScoreArray->Insert(InScore, i);
 			if(TargetScoreArray->Num() > MaxRankingSize)
 			{
@@ -108,11 +110,27 @@ int UWallF1GameInstance::AddNewGameScore(EWallF1GameMode GameMode, int InScore)
 		}
 	}
 
+	// If it's not, add it only if Num < MaxRankingSize
 	if(TargetScoreArray->Num() < MaxRankingSize)
 	{
 		TargetScoreArray->Add(InScore);
 		return TargetScoreArray->Num() - 1;
 	}
 	
+	// Else ignore this score
 	return -1;
+}
+
+void UWallF1GameInstance::LoadConfigFile(FWallF1Config& Config)
+{
+	FString file = FPaths::ProjectContentDir() + TEXT("WallF1Config.json");
+	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+	if (!FileManager.FileExists(*file))
+		UE_LOG(LogTemp, Fatal, TEXT("Could not read configuration file"));
+
+	FString JsonPayload;
+	if (!FFileHelper::LoadFileToString(JsonPayload, *file, FFileHelper::EHashOptions::None))
+		UE_LOG(LogTemp, Fatal, TEXT("Error reading configuration file"));
+		
+	FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Config);
 }

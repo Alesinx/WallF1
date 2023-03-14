@@ -5,11 +5,20 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "MqttUtilities/Public/Interface/MqttClientInterface.h"
+#include "WallF1GameInstance.h"
 #include "WallF1SensorHandler.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
 
 class UMqttClientInterface;
+
+UENUM(BlueprintType)
+enum class EWallF1SensorState : uint8
+{
+	OFF = 0,
+	DETECTION_ENABLED = 1,
+	LED_ON = 2
+};
 
 UENUM(BlueprintType)
 enum class EWallF1SensorMode : uint8
@@ -56,7 +65,7 @@ class WALLF1_API UWallF1SensorHandler : public UObject
 	GENERATED_BODY()
 
 public:
-	void Initialize();
+	void Initialize(FWallF1Config InConfig);
 
 	void EnableSensorDetection(uint8 SensorId);
 	void DisableSensorDetection(uint8 SensorId);
@@ -71,12 +80,17 @@ public:
 	void SetDisplayColor(FWallF1SensorColor InColor) { DisplayColor = InColor; }
 	void SetDetectionColor(FWallF1SensorColor InColor);
 
+	bool AreAllSensorsOff();
+
 	UPROPERTY()
 	FOnSensorDetection OnSensorDetection;
 
 private:
 	UPROPERTY()
 	TScriptInterface<IMqttClientInterface> MqttClient;
+
+	UPROPERTY()
+	EWallF1SensorState SensorsState[9];
 
 	FWallF1SensorColor DisplayColor;
 
@@ -96,4 +110,6 @@ private:
 	
 	UFUNCTION()
 	void OnMessageReceived(FMqttMessage message);
+
+	FWallF1Config WallF1Config;
 };
