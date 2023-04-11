@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "WallF1GameModeInGameWall.h"
 #include "../WallF1GameInstance.h"
 

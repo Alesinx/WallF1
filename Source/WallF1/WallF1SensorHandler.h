@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -45,7 +43,7 @@ struct WALLF1_API FWallF1SensorColor
 };
 
 USTRUCT()
-struct WALLF1_API FWallF1SensorDetectionResponse
+struct WALLF1_API FWallF1SensorResponse
 {
 	GENERATED_BODY()
 

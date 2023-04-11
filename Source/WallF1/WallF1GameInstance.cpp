@@ -36,6 +36,9 @@ void UWallF1GameInstance::LoadInGameLevel(EWallF1GameMode GameMode)
 	case EWallF1GameMode::WALL:
 		Url.Append(WallGameModeURL);
 		break;
+	case EWallF1GameMode::NONE:
+		UE_LOG(LogTemp, Error, TEXT("Trying to load WallF1 GameMode 'None'"));
+		return;
 	}
 
 	UE_LOG(LogTemp, Display, TEXT("LOADING %s LEVEL WITH URL: %s"), *InGameLevelName.ToString(), *Url)
@@ -60,6 +63,9 @@ const TArray<int>& UWallF1GameInstance::GetGameModeRanking(EWallF1GameMode GameM
 		return PuzzleGameModeScoreRanking;
 	case EWallF1GameMode::WALL:
 		return WallGameModeScoreRanking;
+	case EWallF1GameMode::NONE:
+		UE_LOG(LogTemp, Error, TEXT("Trying to get gamemode score of WallF1's GameMode 'None'"));
+		return TopScoreGameModeScoreRanking;
 	}
 
 	UE_LOG(LogTemp, Fatal, TEXT("Could not find score ranking array for specified EWallF1GameMode. Did you add a new game mode and forgot to add a case to the switch?"));

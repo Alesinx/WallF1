@@ -1,7 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-
 #include "WallF1GameModeInGameBase.h"
 #include "../WallF1PlayerController.h"
 #include "../WallF1GameInstance.h"
@@ -99,6 +95,8 @@ void AWallF1GameModeInGameBase::ShowStandyByScreen()
 
 void AWallF1GameModeInGameBase::HandleCountdownStep()
 {
+	CountdownLeft--;
+
 	if (CountdownLeft <= 0)
 	{
 		// Begin
@@ -110,8 +108,6 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 	}
 	else
 	{
-		CountdownLeft--;
-
 		switch (CountdownLeft)
 		{
 		case 4:
@@ -146,12 +142,12 @@ void AWallF1GameModeInGameBase::ResetStandbyTimer()
 
 void AWallF1GameModeInGameBase::StartWallF1Game()
 {
-	UE_LOG(LogTemp, Fatal, TEXT("StartWallF1Game should never be called in in-game mode base"));
+	UE_LOG(LogTemp, Fatal, TEXT("StartWallF1Game should never be called in in-game mode base. Something is wrong"));
 }
 
 void AWallF1GameModeInGameBase::HandleSensorDetection(int SensorId)
 {
-	UE_LOG(LogTemp, Fatal, TEXT("HandleSensorDetection should never be called in in-game mode base"));
+	UE_LOG(LogTemp, Fatal, TEXT("Sensor detection on game selection screen. Detection should not be enable at this point. Something might be wrong"));
 }
 
 void AWallF1GameModeInGameBase::IncreaseScore(int InAmount)

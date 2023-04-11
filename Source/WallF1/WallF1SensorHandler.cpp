@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "WallF1SensorHandler.h"
 #include "MqttUtilitiesBPL.h"
 #include "MqttUtilities/Public/Entities/MqttClientConfig.h"
@@ -241,8 +238,16 @@ void UWallF1SensorHandler::OnSubscribed(int mid, const TArray<int>& qos)
 
 void UWallF1SensorHandler::OnMessageReceived(FMqttMessage message)
 {
-	FWallF1SensorDetectionResponse SensorMessage;
-	FJsonObjectConverter::JsonObjectStringToUStruct(message.Message, &SensorMessage);
 	UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *message.Message);
-	OnSensorDetection.Broadcast(SensorMessage.idSensor);
+
+	bool bIsACK = message.Message.Contains("ACK");
+	if (!bIsACK)
+	{
+		// Parse json message
+		FWallF1SensorResponse SensorResponse;
+		FJsonObjectConverter::JsonObjectStringToUStruct(message.Message, &SensorResponse);
+
+		// Broadcast delegate
+		OnSensorDetection.Broadcast(SensorResponse.idSensor);
+	}
 }

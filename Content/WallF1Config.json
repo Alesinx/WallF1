@@ -1,5 +1,5 @@
 {
-	"Host" : "test.mosquitto.org",
+	"Host" : "192.168.0.14",
     "Port" : 1883,
     "TopicToPublishIn" : "tikonos/detector",
     "TopicToSubscribeTo" : "tikonos/visualizer",

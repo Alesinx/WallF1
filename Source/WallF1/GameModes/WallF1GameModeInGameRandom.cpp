@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "WallF1GameModeInGameRandom.h"
 #include "../WallF1GameInstance.h"
 
@@ -23,8 +20,8 @@ void AWallF1GameModeInGameRandom::HandleSensorDetection(int SensorId)
 
 	IncreaseScore(1);
 
-	UE_LOG(LogTemp, Display, TEXT("Disabling detection on sensor: %i"), SensorId + 1);
-	CachedSensorHandler->DisableSensorDetection(SensorId + 1);
+	UE_LOG(LogTemp, Display, TEXT("Disabling detection on sensor: %i"), SensorId);
+	CachedSensorHandler->DisableSensorDetection(SensorId);
 
 	int RndSensor = FMath::RandRange(1, 9);
 	UE_LOG(LogTemp, Display, TEXT("Enabling detection on sensor: %i"), RndSensor);
