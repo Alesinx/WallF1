@@ -67,16 +67,18 @@ public:
 
 	void EnableSensorDetection(uint8 SensorId);
 	void DisableSensorDetection(uint8 SensorId);
-	void TurnOnLed(uint8 SensorId);
+	void TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor = DefaultDisplayColor);
 	void TurnOffLed(uint8 SensorId);
 
 	void EnableAllSensorsDetection();
 	void DisableAllSensorsDetection();
-	void TurnOnAllLeds();
+	void TurnOnAllLeds(FWallF1SensorColor InColor);
 	void TurnOffAllLeds();
 
-	void SetDisplayColor(FWallF1SensorColor InColor) { DisplayColor = InColor; }
-	void SetDetectionColor(FWallF1SensorColor InColor);
+	void SetDefaultDisplayColor(FWallF1SensorColor InColor);
+
+	void SetDetectionColor(uint8 SensorId, FWallF1SensorColor InColor);
+	void SetDetectionColorOfAllSensors(FWallF1SensorColor InColor);
 
 	bool AreAllSensorsOff();
 
@@ -90,7 +92,7 @@ private:
 	UPROPERTY()
 	EWallF1SensorState SensorsState[9];
 
-	FWallF1SensorColor DisplayColor;
+	static FWallF1SensorColor DefaultDisplayColor;
 
 	FOnConnectDelegate ConnectDelegate;
 	FOnPublishDelegate MessagePublishDelegate;

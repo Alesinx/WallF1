@@ -59,7 +59,7 @@ void AWallF1GameModeInGameBase::PlayCountdownAnimation()
 	Red.g = 0;
 	Red.b = 0;
 
-	CachedSensorHandler->SetDisplayColor(Red);
+	CachedSensorHandler->SetDefaultDisplayColor(Red);
 
 	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1 , true);
 }
@@ -101,8 +101,8 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 	{
 		// Begin
 		GetWorld()->GetTimerManager().ClearTimer(GameStartCountdown);
-		CachedSensorHandler->SetDisplayColor(SensorDisplayColor);
-		CachedSensorHandler->SetDetectionColor(SensorDetectionColor);
+		CachedSensorHandler->SetDefaultDisplayColor(SensorDisplayColor);
+		CachedSensorHandler->SetDetectionColorOfAllSensors(SensorDetectionColor);
 		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::GameOver, CachedGameInstance->GetWallF1Config().GameDurationInSeconds, false);
 		StartWallF1Game();
 	}

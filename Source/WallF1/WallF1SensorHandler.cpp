@@ -5,6 +5,8 @@
 #include "MqttUtilities/Public/Entities/MqttMessage.h"
 #include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
 
+FWallF1SensorColor UWallF1SensorHandler::DefaultDisplayColor = FWallF1SensorColor();
+
 void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 {
 	WallF1Config = InConfig;
@@ -74,7 +76,7 @@ void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
 
-void UWallF1SensorHandler::TurnOnLed(uint8 SensorId)
+void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 {
 	if (!MqttClient)
 	{
@@ -84,8 +86,9 @@ void UWallF1SensorHandler::TurnOnLed(uint8 SensorId)
 
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
-	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, DisplayColor.r, DisplayColor.g, DisplayColor.b);
+	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
 
+	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::LED_ON;
@@ -151,7 +154,7 @@ void UWallF1SensorHandler::DisableAllSensorsDetection()
 	}
 }
 
-void UWallF1SensorHandler::TurnOnAllLeds()
+void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 {
 	if (!MqttClient)
 	{
@@ -161,7 +164,7 @@ void UWallF1SensorHandler::TurnOnAllLeds()
 
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
-	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), DisplayColor.r, DisplayColor.g, DisplayColor.b);
+	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 
 	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
@@ -193,7 +196,12 @@ void UWallF1SensorHandler::TurnOffAllLeds()
 	}
 }
 
-void UWallF1SensorHandler::SetDetectionColor(FWallF1SensorColor InColor)
+void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
+{
+	UWallF1SensorHandler::DefaultDisplayColor = InColor;
+}
+
+void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InColor)
 {
 	if (!MqttClient)
 	{
@@ -203,7 +211,7 @@ void UWallF1SensorHandler::SetDetectionColor(FWallF1SensorColor InColor)
 
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
-	message.Message = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), DisplayColor.r, DisplayColor.g, DisplayColor.b);
+	message.Message = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 
 	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
 	MqttClient->Publish(message);
