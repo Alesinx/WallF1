@@ -51,9 +51,7 @@ void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::DETECTION_ENABLED;
 }
@@ -69,9 +67,7 @@ void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
@@ -87,9 +83,7 @@ void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::LED_ON;
 }
@@ -105,9 +99,7 @@ void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
@@ -123,9 +115,7 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = "{\"modo\":0,\"idSensor\":0}";
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	for (int i = 0; i < 9; ++i)
 	{
@@ -144,9 +134,7 @@ void UWallF1SensorHandler::DisableAllSensorsDetection()
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = "{\"modo\":1,\"idSensor\":0}";
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	for (int i = 0; i < 9; ++i)
 	{
@@ -165,9 +153,7 @@ void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	for (int i = 0; i < 9; ++i)
 	{
@@ -186,9 +172,7 @@ void UWallF1SensorHandler::TurnOffAllLeds()
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = "{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}";
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 
 	for (int i = 0; i < 9; ++i)
 	{
@@ -212,9 +196,7 @@ void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InCo
 	FMqttMessage message;
 	message.Topic = WallF1Config.TopicToPublishIn;
 	message.Message = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
-
-	UE_LOG(LogTemp, Display, TEXT("PUBLISHING MESSAGE: %s"), *message.Message);
-	MqttClient->Publish(message);
+	QueueMessage(message);
 }
 
 bool UWallF1SensorHandler::AreAllSensorsOff()
@@ -227,6 +209,47 @@ bool UWallF1SensorHandler::AreAllSensorsOff()
 		}
 	}
 	return true;
+}
+
+void UWallF1SensorHandler::Tick(float DeltaTime)
+{
+	// Remove any acknowledged or expired message
+	if (!PendingMessageQueue.IsEmpty())
+	{
+		if(PendingMessageQueue[0].bAcknowledged)
+		{
+			if(!PendingMessageQueue[0].bPublishRequested)
+				UE_LOG(LogTemp, Fatal, TEXT("Not published pending message was acknowledged. State of games is inreliable"))
+
+			// Dequeue
+			PendingMessageQueue.RemoveAt(0);
+		}
+		else if (FDateTime::UtcNow().ToUnixTimestamp() - PendingMessageQueue[0].TimeStamp >= 2000)
+		{
+			UE_LOG(LogTemp, Fatal, TEXT("Pending message acknowledgment expired. State of games is inreliable"))
+
+			// Dequeue
+			PendingMessageQueue.RemoveAt(0);
+		}
+	}
+
+	// If the queue is still not empty after the potential message removal and the first message publishing is not requeted, request publishing of the first message
+	if (!PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
+	{
+		MqttClient->Publish(PendingMessageQueue[0].MqttMessage);
+		PendingMessageQueue[0].bPublishRequested = true;
+	}
+}
+
+void UWallF1SensorHandler::QueueMessage(FMqttMessage Message)
+{
+	UE_LOG(LogTemp, Display, TEXT("REQUESTING MESSAGE PUBLISH: %s"), *Message.Message);
+	FWallF1PendingMessage PendingMessage;
+	PendingMessage.MqttMessage = Message;
+	PendingMessage.bPublishRequested = false;
+	PendingMessage.bAcknowledged = false;
+	PendingMessage.TimeStamp = FDateTime::UtcNow().ToUnixTimestamp();
+	PendingMessageQueue.Add(PendingMessage);
 }
 
 void UWallF1SensorHandler::OnClientConnected()
@@ -249,7 +272,9 @@ void UWallF1SensorHandler::OnMessageReceived(FMqttMessage message)
 	UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *message.Message);
 
 	bool bIsACK = message.Message.Contains("ACK");
-	if (!bIsACK)
+	if (bIsACK)
+		HandleACKReceived(message);
+	else
 	{
 		// Parse json message
 		FWallF1SensorResponse SensorResponse;
@@ -258,4 +283,15 @@ void UWallF1SensorHandler::OnMessageReceived(FMqttMessage message)
 		// Broadcast delegate
 		OnSensorDetection.Broadcast(SensorResponse.idSensor);
 	}
+}
+
+void UWallF1SensorHandler::HandleACKReceived(FMqttMessage message)
+{
+	if(PendingMessageQueue.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Recived ACK but pending message queue is empty!"))
+		return;
+	}
+
+	PendingMessageQueue[0].bAcknowledged = true;
 }
