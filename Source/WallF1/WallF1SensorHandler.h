@@ -78,7 +78,7 @@ struct WALLF1_API FWallF1SensorResponse
  * Class to handle WallF1 sensors
  */
 UCLASS()
-class WALLF1_API UWallF1SensorHandler : public UObject
+class WALLF1_API UWallF1SensorHandler : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
 
@@ -122,8 +122,10 @@ private:
 	//FOnSubscribeDelegate SubscribeDelegate;
 	//FOnMessageDelegate MessageReceivedDelegate;
 
-	UFUNCTION()
 	void Tick(float DeltaTime);
+	virtual bool IsTickable() const override;
+	virtual TStatId GetStatId() const override;
+	virtual bool IsTickableInEditor() const override;
 
 	UFUNCTION()
 	void QueueMessage(FWallF1MqttMessage Message);

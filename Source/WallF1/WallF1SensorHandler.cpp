@@ -247,6 +247,21 @@ void UWallF1SensorHandler::Tick(float DeltaTime)
 //	}
 }
 
+bool UWallF1SensorHandler::IsTickable() const
+{
+	return true;
+}
+
+TStatId UWallF1SensorHandler::GetStatId() const
+{
+	return TStatId();
+}
+
+bool UWallF1SensorHandler::IsTickableInEditor() const
+{
+	return true;
+}
+
 void UWallF1SensorHandler::QueueMessage(FWallF1MqttMessage Message)
 {
 	//UE_LOG(LogTemp, Display, TEXT("REQUESTING MESSAGE PUBLISH: %s"), *Message.Message);

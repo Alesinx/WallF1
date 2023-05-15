@@ -26,7 +26,7 @@ void AWallF1GameModeInGamePuzzle::StartWallF1Game()
 void AWallF1GameModeInGamePuzzle::HandleSensorDetection(int SensorId)
 {
 	IncreaseScore(1);
-	CachedSensorHandler->DisableSensorDetection(SensorId + 1);
+	CachedSensorHandler->DisableSensorDetection(SensorId);
 
 	if (CachedSensorHandler->AreAllSensorsOff())
 	{

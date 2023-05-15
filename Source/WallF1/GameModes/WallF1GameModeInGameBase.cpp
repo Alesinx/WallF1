@@ -85,6 +85,11 @@ void AWallF1GameModeInGameBase::GameOver()
 	UE_LOG(LogTemp, Display, TEXT("GAME OVER"));
 	RankingPosition = CachedGameInstance->AddNewGameScore(WallF1GameMode, Score);
 	OnGameOver.Broadcast();
+
+	CachedSensorHandler->DisableAllSensorsDetection();
+	CachedSensorHandler->TurnOffAllLeds();
+
+	CachedSensorHandler->OnSensorDetection.RemoveDynamic(this, &AWallF1GameModeInGameBase::HandleSensorDetection);
 }
 
 void AWallF1GameModeInGameBase::ShowStandyByScreen()
