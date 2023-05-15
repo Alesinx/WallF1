@@ -2,14 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "MqttUtilities/Public/Interface/MqttClientInterface.h"
 #include "WallF1GameInstance.h"
 #include "WallF1SensorHandler.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
 
-class UMqttClientInterface;
-struct FMqttMessage;
+class UMQTTClientObject;
 
 UENUM(BlueprintType)
 enum class EWallF1SensorState : uint8
@@ -26,6 +24,26 @@ enum class EWallF1SensorMode : uint8
 	DISABLE_SENSOR = 1,
 	DISPLAY_COLOR = 2,
 	SET_DETECTION_COLOR = 3,
+};
+
+USTRUCT()
+struct WALLF1_API FWallF1MqttMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString payload;
+};
+
+USTRUCT()
+struct WALLF1_API FWallF1PendingMessage
+{
+	GENERATED_BODY()
+
+	FWallF1MqttMessage MqttMessage;
+	int64 TimeStamp = 0;
+	bool bPublishRequested = false;
+	bool bAcknowledged = false;
 };
 
 USTRUCT()
@@ -55,16 +73,6 @@ struct WALLF1_API FWallF1SensorResponse
 	int idSensor;
 };
 
-USTRUCT()
-struct WALLF1_API FWallF1PendingMessage
-{
-	GENERATED_BODY()
-
-	FMqttMessage MqttMessage;
-	int64 TimeStamp = 0;
-	bool bPublishRequested = false;
-	bool bAcknowledged = false;
-};
 
 /**
  * Class to handle WallF1 sensors
@@ -99,7 +107,7 @@ public:
 
 private:
 	UPROPERTY()
-	TScriptInterface<IMqttClientInterface> MqttClient;
+	UMQTTClientObject* MqttClient;
 
 	UPROPERTY()
 	EWallF1SensorState SensorsState[9];
@@ -109,16 +117,16 @@ private:
 
 	static FWallF1SensorColor DefaultDisplayColor;
 
-	FOnConnectDelegate ConnectDelegate;
-	FOnPublishDelegate MessagePublishDelegate;
-	FOnSubscribeDelegate SubscribeDelegate;
-	FOnMessageDelegate MessageReceivedDelegate;
+	//FOnConnectDelegate ConnectDelegate;
+	//FOnPublishDelegate MessagePublishDelegate;
+	//FOnSubscribeDelegate SubscribeDelegate;
+	//FOnMessageDelegate MessageReceivedDelegate;
 
 	UFUNCTION()
 	void Tick(float DeltaTime);
 
 	UFUNCTION()
-	void QueueMessage(FMqttMessage Message);
+	void QueueMessage(FWallF1MqttMessage Message);
 
 	UFUNCTION()
 	void OnClientConnected();
@@ -130,10 +138,10 @@ private:
 	void OnSubscribed(int mid, const TArray<int>& qos);
 	
 	UFUNCTION()
-	void OnMessageReceived(FMqttMessage message);
+	void OnMessageReceived(FWallF1MqttMessage message);
 
 	UFUNCTION()
-	void HandleACKReceived(FMqttMessage message);
+	void HandleACKReceived(FWallF1MqttMessage message);
 
 	FWallF1Config WallF1Config;
 };
