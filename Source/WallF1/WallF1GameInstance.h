@@ -9,27 +9,30 @@
 class UWallF1SensorHandler;
 class ULevel;
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct WALLF1_API FWallF1Config
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FString Host;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	int Port;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FString TopicToPublishIn;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FString TopicToSubscribeTo;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	int QoS = 2;
+
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	int GameDurationInSeconds = 30;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	int StandByTimerInSeconds = 60;
 };
 
@@ -108,11 +111,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FString WallGameModeURL;
 
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	UWallF1SensorHandler* SensorHandler;
+
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	FWallF1Config WallF1Config;
+
 private:
 	int MaxRankingSize = 5;
-
-	UPROPERTY()
-	UWallF1SensorHandler* SensorHandler;
 
 	UPROPERTY()
 	TArray<int> TopScoreGameModeScoreRanking;
@@ -127,6 +133,4 @@ private:
 	TArray<int> WallGameModeScoreRanking;
 
 	void LoadConfigFile(FWallF1Config& WallF1Config);
-
-	FWallF1Config WallF1Config;
 };

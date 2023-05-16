@@ -3,11 +3,13 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "WallF1GameInstance.h"
+#include "MQTTShared.h"
 #include "WallF1SensorHandler.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
 
 class UMQTTClientObject;
+struct FMQTTClientMessage;
 
 UENUM(BlueprintType)
 enum class EWallF1SensorState : uint8
@@ -26,21 +28,21 @@ enum class EWallF1SensorMode : uint8
 	SET_DETECTION_COLOR = 3,
 };
 
-USTRUCT()
-struct WALLF1_API FWallF1MqttMessage
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	FString payload;
-};
+//USTRUCT()
+//struct WALLF1_API FWallF1MqttMessage
+//{
+//	GENERATED_BODY()
+//
+//	UPROPERTY()
+//	FString payload;
+//};
 
 USTRUCT()
 struct WALLF1_API FWallF1PendingMessage
 {
 	GENERATED_BODY()
 
-	FWallF1MqttMessage MqttMessage;
+	FString Payload;
 	int64 TimeStamp = 0;
 	bool bPublishRequested = false;
 	bool bAcknowledged = false;
@@ -77,12 +79,13 @@ struct WALLF1_API FWallF1SensorResponse
 /**
  * Class to handle WallF1 sensors
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WALLF1_API UWallF1SensorHandler : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void Initialize(FWallF1Config InConfig);
 
 	void EnableSensorDetection(uint8 SensorId);
@@ -105,10 +108,28 @@ public:
 	UPROPERTY()
 	FOnSensorDetection OnSensorDetection;
 
-private:
-	UPROPERTY()
+protected:
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	UMQTTClientObject* MqttClient;
 
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	FWallF1Config WallF1Config;
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+		void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
+			UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
+			UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
+			const bool bInRetain = false);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+	void BPSubscribe(UPARAM(DisplayName = "Topic") const FString& InTopic,
+		UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce);
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
+	void OnMessageReceived(const FMQTTClientMessage& message);
+
+private:
 	UPROPERTY()
 	EWallF1SensorState SensorsState[9];
 
@@ -123,27 +144,22 @@ private:
 	//FOnMessageDelegate MessageReceivedDelegate;
 
 	void Tick(float DeltaTime);
-	virtual bool IsTickable() const override;
-	virtual TStatId GetStatId() const override;
-	virtual bool IsTickableInEditor() const override;
+	virtual bool IsTickable() const override { return true; };
+	virtual TStatId GetStatId() const override { return TStatId(); }
+	virtual bool IsTickableInEditor() const override { return true; }
 
 	UFUNCTION()
-	void QueueMessage(FWallF1MqttMessage Message);
+	void QueueMessage(const FString& Message);
+
+	//UFUNCTION()
+	//void OnClientConnected();
+
+	//UFUNCTION()
+	//void OnMessagePublished(int mid);
+
+	//UFUNCTION()
+	//void OnSubscribed(int mid, const TArray<int>& qos);	
 
 	UFUNCTION()
-	void OnClientConnected();
-
-	UFUNCTION()
-	void OnMessagePublished(int mid);
-
-	UFUNCTION()
-	void OnSubscribed(int mid, const TArray<int>& qos);
-	
-	UFUNCTION()
-	void OnMessageReceived(FWallF1MqttMessage message);
-
-	UFUNCTION()
-	void HandleACKReceived(FWallF1MqttMessage message);
-
-	FWallF1Config WallF1Config;
+	void HandleACKReceived();
 };

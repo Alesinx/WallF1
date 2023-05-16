@@ -13,10 +13,11 @@ void UWallF1GameInstance::Init()
 {
 	Super::Init();
 
-	LoadConfigFile(WallF1Config);
+	LoadConfigFile(WallF1Config);	
 
-	SensorHandler = NewObject<UWallF1SensorHandler>();
-	SensorHandler->Initialize(WallF1Config);
+	// Instanced in blueprint
+	//SensorHandler = NewObject<UWallF1SensorHandler>();
+	//SensorHandler->Initialize(WallF1Config);
 }
 
 void UWallF1GameInstance::LoadInGameLevel(EWallF1GameMode GameMode)
