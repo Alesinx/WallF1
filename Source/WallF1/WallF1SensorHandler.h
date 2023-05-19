@@ -3,13 +3,9 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "WallF1GameInstance.h"
-#include "MQTTShared.h"
 #include "WallF1SensorHandler.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
-
-class UMQTTClientObject;
-struct FMQTTClientMessage;
 
 UENUM(BlueprintType)
 enum class EWallF1SensorState : uint8
@@ -109,28 +105,28 @@ public:
 	FOnSensorDetection OnSensorDetection;
 
 protected:
-	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
-	UMQTTClientObject* MqttClient;
+	//UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	//UMQTTClientObject* MqttClient;
 
 	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FWallF1Config WallF1Config;
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	void BPConnect();
+	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+	//void BPConnect();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	void BPSubscribe(UPARAM(DisplayName = "Topic") const FString& InTopic,
-		UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce);
+	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+	//void BPSubscribe(UPARAM(DisplayName = "Topic") const FString& InTopic,
+	//	UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
-		UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
-		UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
-		const bool bInRetain = false);
+	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+	//void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
+	//	UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
+	//	UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
+	//	const bool bInRetain = false);
 
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
-	void OnMessageReceived(const FMQTTClientMessage& message);
+	void OnMessageReceived();
 
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void OnConnected();

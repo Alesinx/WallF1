@@ -4,9 +4,9 @@
 //#include "MqttUtilities/Public/Entities/MqttConnectionData.h"
 //#include "MqttUtilities/Public/Entities/MqttMessage.h"
 #include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
-#include "MQTTClientObject.h"
-#include "MQTTSubsystem.h"
-#include "MQTTClientMessage.h"
+//#include "MQTTClientObject.h"
+//#include "MQTTSubsystem.h"
+//#include "MQTTClientMessage.h"
 
 FWallF1SensorColor UWallF1SensorHandler::DefaultDisplayColor = FWallF1SensorColor();
 
@@ -14,14 +14,14 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 {
 	WallF1Config = InConfig;
 	 
-	FMQTTURL mqttUrl;
-	mqttUrl.Host = WallF1Config.Host;
-	InConfig.Port = WallF1Config.Port;
+	//FMQTTURL mqttUrl;
+	//mqttUrl.Host = WallF1Config.Host;
+	//InConfig.Port = WallF1Config.Port;
 
-	MqttClient = UMQTTSubsystem::GetOrCreateClient(this, mqttUrl);
+	//MqttClient = UMQTTSubsystem::GetOrCreateClient(this, mqttUrl);
 
-	BPConnect();
-	BPSubscribe(WallF1Config.TopicToSubscribeTo, static_cast<EMQTTQualityOfService>(WallF1Config.QoS));
+	//BPConnect();
+	//BPSubscribe(WallF1Config.TopicToSubscribeTo, static_cast<EMQTTQualityOfService>(WallF1Config.QoS));
 
 	//WallF1Config = InConfig;
 	//FMqttClientConfig config;
@@ -56,11 +56,11 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 
 void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
 	QueueMessage(PayloadString);
@@ -70,11 +70,11 @@ void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 
 void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
 	QueueMessage(PayloadString);
@@ -84,11 +84,11 @@ void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 
 void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
@@ -98,11 +98,11 @@ void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
 	QueueMessage(PayloadString);
@@ -112,11 +112,11 @@ void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 
 void UWallF1SensorHandler::EnableAllSensorsDetection()
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":0}"));
 	QueueMessage(PayloadString);
@@ -129,11 +129,11 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 
 void UWallF1SensorHandler::DisableAllSensorsDetection()
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":0}"));
 	QueueMessage(PayloadString);
@@ -146,11 +146,11 @@ void UWallF1SensorHandler::DisableAllSensorsDetection()
 
 void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
@@ -164,11 +164,11 @@ void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 void UWallF1SensorHandler::TurnOffAllLeds()
 {
 
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}"));
 	QueueMessage(PayloadString);
@@ -186,11 +186,11 @@ void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InColor)
 {
-	if (!MqttClient)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
+	//if (!MqttClient)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+	//	return;
+	//}
 
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
@@ -240,7 +240,7 @@ void UWallF1SensorHandler::Tick(float DeltaTime)
 		//PayloadBytes.AddUninitialized(size);
 		//StringToBytes(PayloadString, PayloadBytes.GetData(), size);
 
-		BPPublish(WallF1Config.TopicToPublishIn, TArray<uint8>((uint8*)TCHAR_TO_UTF8(*PayloadString), PayloadString.Len()), EMQTTQualityOfService::ExactlyOnce);
+		//BPPublish(WallF1Config.TopicToPublishIn, TArray<uint8>((uint8*)TCHAR_TO_UTF8(*PayloadString), PayloadString.Len()), EMQTTQualityOfService::ExactlyOnce);
 
 		PendingMessageQueue[0].bPublishRequested = true;
 	}
@@ -258,23 +258,23 @@ void UWallF1SensorHandler::QueueMessage(const FString& Message)
 	PendingMessageQueue.Add(PendingMessage);
 }
 
-void UWallF1SensorHandler::OnMessageReceived(const FMQTTClientMessage& message)
+void UWallF1SensorHandler::OnMessageReceived()
 {
-	FString receivedPayload = message.GetPayloadAsString();
-	UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *receivedPayload);
+	//FString receivedPayload = message.GetPayloadAsString();
+	//UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *receivedPayload);
 
-	bool bIsACK = receivedPayload.Contains("ACK");
-	if (bIsACK)
-		HandleACKReceived();
-	else
-	{
-		// Parse json message
-		FWallF1SensorResponse SensorResponse;
-		FJsonObjectConverter::JsonObjectStringToUStruct(receivedPayload, &SensorResponse);
+	//bool bIsACK = receivedPayload.Contains("ACK");
+	//if (bIsACK)
+	//	HandleACKReceived();
+	//else
+	//{
+	//	// Parse json message
+	//	FWallF1SensorResponse SensorResponse;
+	//	FJsonObjectConverter::JsonObjectStringToUStruct(receivedPayload, &SensorResponse);
 
-		// Broadcast delegate
-		OnSensorDetection.Broadcast(SensorResponse.idSensor);
-	}
+	//	// Broadcast delegate
+	//	OnSensorDetection.Broadcast(SensorResponse.idSensor);
+	//}
 }
 
 void UWallF1SensorHandler::OnConnected()
