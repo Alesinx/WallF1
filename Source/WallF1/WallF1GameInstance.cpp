@@ -11,13 +11,13 @@
 
 void UWallF1GameInstance::Init()
 {
-	Super::Init();
-
 	LoadConfigFile(WallF1Config);	
 
 	// Instanced in blueprint
 	//SensorHandler = NewObject<UWallF1SensorHandler>();
 	//SensorHandler->Initialize(WallF1Config);
+
+	Super::Init();
 }
 
 void UWallF1GameInstance::LoadInGameLevel(EWallF1GameMode GameMode)
@@ -139,5 +139,5 @@ void UWallF1GameInstance::LoadConfigFile(FWallF1Config& Config)
 	if (!FFileHelper::LoadFileToString(JsonPayload, *file, FFileHelper::EHashOptions::None))
 		UE_LOG(LogTemp, Fatal, TEXT("Error reading configuration file"));
 		
-	FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Config);
+FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Config);
 }

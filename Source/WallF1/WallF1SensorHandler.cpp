@@ -20,9 +20,8 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 
 	MqttClient = UMQTTSubsystem::GetOrCreateClient(this, mqttUrl);
 
-	//TArray<uint8> payload;
-	//MqttClient->Publish("", payload, EMQTTQualityOfService::ExactlyOnce);
-	//MqttClient->Initialize(mqttUrl);
+	BPConnect();
+	BPSubscribe(WallF1Config.TopicToSubscribeTo, static_cast<EMQTTQualityOfService>(WallF1Config.QoS));
 
 	//WallF1Config = InConfig;
 	//FMqttClientConfig config;
@@ -57,104 +56,92 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 
 void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
+	QueueMessage(PayloadString);
 
-	//SensorsState[SensorId - 1] = EWallF1SensorState::DETECTION_ENABLED;
+	SensorsState[SensorId - 1] = EWallF1SensorState::DETECTION_ENABLED;
 }
 
 void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
+	QueueMessage(PayloadString);
 
-	//SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
+	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
 
 void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
+	QueueMessage(PayloadString);
 
-	//SensorsState[SensorId - 1] = EWallF1SensorState::LED_ON;
+	SensorsState[SensorId - 1] = EWallF1SensorState::LED_ON;
 }
 
 void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
+	QueueMessage(PayloadString);
 
-	//SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
+	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
 
 void UWallF1SensorHandler::EnableAllSensorsDetection()
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = "{\"modo\":0,\"idSensor\":0}";
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":0}"));
+	QueueMessage(PayloadString);
 
-	//for (int i = 0; i < 9; ++i)
-	//{
-	//	SensorsState[i] = EWallF1SensorState::DETECTION_ENABLED;
-	//}
+	for (int i = 0; i < 9; ++i)
+	{
+		SensorsState[i] = EWallF1SensorState::OFF;
+	}
 }
 
 void UWallF1SensorHandler::DisableAllSensorsDetection()
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = "{\"modo\":1,\"idSensor\":0}";
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":0}"));
+	QueueMessage(PayloadString);
 
-	//for (int i = 0; i < 9; ++i)
-	//{
-	//	SensorsState[i] = EWallF1SensorState::OFF;
-	//}
+	for (int i = 0; i < 9; ++i)
+	{
+		SensorsState[i] = EWallF1SensorState::OFF;
+	}
 }
 
 void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
@@ -165,39 +152,31 @@ void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 		return;
 	}
 
-	FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
+	QueueMessage(PayloadString);
 
-
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
-	//QueueMessage(message);
-
-	//for (int i = 0; i < 9; ++i)
-	//{
-	//	SensorsState[i] = EWallF1SensorState::LED_ON;
-	//}
+	for (int i = 0; i < 9; ++i)
+	{
+		SensorsState[i] = EWallF1SensorState::LED_ON;
+	}
 }
 
 void UWallF1SensorHandler::TurnOffAllLeds()
 {
-	//ensure()
 
-	//if (!MqttClient)
-	//{
-		//UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		//return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = "{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}";
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}"));
+	QueueMessage(PayloadString);
 
-	//for (int i = 0; i < 9; ++i)
-	//{
-	//	SensorsState[i] = EWallF1SensorState::OFF;
-	//}
+	for (int i = 0; i < 9; ++i)
+	{
+		SensorsState[i] = EWallF1SensorState::OFF;
+	}
 }
 
 void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
@@ -207,16 +186,14 @@ void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InColor)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
+	if (!MqttClient)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
+		return;
+	}
 
-	//FMqttMessage message;
-	//message.Topic = WallF1Config.TopicToPublishIn;
-	//message.Message = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
-	//QueueMessage(message);
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
+	QueueMessage(PayloadString);
 }
 
 bool UWallF1SensorHandler::AreAllSensorsOff()
@@ -257,13 +234,13 @@ void UWallF1SensorHandler::Tick(float DeltaTime)
 	if (!PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;
-		const uint32 size = PayloadString.Len();
+		//const uint32 size = PayloadString.Len();
 
-		TArray<uint8> PayloadBytes;
-		PayloadBytes.AddUninitialized(size);
-		StringToBytes(PayloadString, PayloadBytes.GetData(), size);
+		//TArray<uint8> PayloadBytes;
+		//PayloadBytes.AddUninitialized(size);
+		//StringToBytes(PayloadString, PayloadBytes.GetData(), size);
 
-		BPPublish(WallF1Config.TopicToPublishIn, PayloadBytes, EMQTTQualityOfService::ExactlyOnce);
+		BPPublish(WallF1Config.TopicToPublishIn, TArray<uint8>((uint8*)TCHAR_TO_UTF8(*PayloadString), PayloadString.Len()), EMQTTQualityOfService::ExactlyOnce);
 
 		PendingMessageQueue[0].bPublishRequested = true;
 	}
@@ -280,21 +257,6 @@ void UWallF1SensorHandler::QueueMessage(const FString& Message)
 	PendingMessage.TimeStamp = FDateTime::UtcNow().ToUnixTimestamp();
 	PendingMessageQueue.Add(PendingMessage);
 }
-
-//void UWallF1SensorHandler::OnClientConnected()
-//{
-//	UE_LOG(LogTemp, Display, TEXT("CLIENT CONNECTED"));
-//}
-//
-//void UWallF1SensorHandler::OnMessagePublished(int mid)
-//{
-//	UE_LOG(LogTemp, Display, TEXT("MESSAGE PUBLISHED WITH MID: %i"), mid);
-//}
-//
-//void UWallF1SensorHandler::OnSubscribed(int mid, const TArray<int>& qos)
-//{
-//	UE_LOG(LogTemp, Display, TEXT("CLIENT SUBSCRIBED"));
-//}
 
 void UWallF1SensorHandler::OnMessageReceived(const FMQTTClientMessage& message)
 {
@@ -313,6 +275,10 @@ void UWallF1SensorHandler::OnMessageReceived(const FMQTTClientMessage& message)
 		// Broadcast delegate
 		OnSensorDetection.Broadcast(SensorResponse.idSensor);
 	}
+}
+
+void UWallF1SensorHandler::OnConnected()
+{
 }
 
 void UWallF1SensorHandler::HandleACKReceived()

@@ -117,17 +117,23 @@ protected:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-		void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
-			UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
-			UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
-			const bool bInRetain = false);
+	void BPConnect();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
 	void BPSubscribe(UPARAM(DisplayName = "Topic") const FString& InTopic,
 		UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
+	void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
+		UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
+		UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
+		const bool bInRetain = false);
+
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void OnMessageReceived(const FMQTTClientMessage& message);
+
+	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
+	void OnConnected();
 
 private:
 	UPROPERTY()
