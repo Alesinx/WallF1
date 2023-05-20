@@ -7,6 +7,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
 
+class AMqttActor;
+
 UENUM(BlueprintType)
 enum class EWallF1SensorState : uint8
 {
@@ -106,7 +108,10 @@ public:
 
 protected:
 	//UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
-	//UMQTTClientObject* MqttClient;
+	//AMqttActor* MqttClient;
+
+	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
+	AMqttActor* MqttActor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FWallF1Config WallF1Config;

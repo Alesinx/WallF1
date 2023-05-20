@@ -38,7 +38,7 @@ void AWallF1GameModeInGameBase::StartPlay()
 		UIWidgetClass = CachedGameInstance->GetGameModeSelectionWidgetClass();
 	else
 		UIWidgetClass = CachedGameInstance->GetInGameWidgetClass();
-		
+
 
 	if (!UIWidgetClass)
 		UE_LOG(LogTemp, Fatal, TEXT("Could not create UI widget. UI widget class reference was null"));
@@ -61,7 +61,7 @@ void AWallF1GameModeInGameBase::PlayCountdownAnimation()
 
 	CachedSensorHandler->SetDefaultDisplayColor(Red);
 
-	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1 , true);
+	GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::HandleCountdownStep, 1, true);
 }
 
 void AWallF1GameModeInGameBase::StartGameModeSelection()
@@ -71,7 +71,7 @@ void AWallF1GameModeInGameBase::StartGameModeSelection()
 	CachedSensorHandler->DisableAllSensorsDetection();
 	CachedSensorHandler->TurnOffAllLeds();
 
-	if(CachedGameInstance->bShowStandbyScreenOnGameModeSelectLoad)
+	if (CachedGameInstance->bShowStandbyScreenOnGameModeSelectLoad)
 	{
 		ShowStandyByScreen();
 
@@ -94,7 +94,7 @@ void AWallF1GameModeInGameBase::GameOver()
 
 void AWallF1GameModeInGameBase::ShowStandyByScreen()
 {
-	if(WallF1GameMode == EWallF1GameMode::NONE)
+	if (WallF1GameMode == EWallF1GameMode::NONE)
 		OnStandBy.Broadcast();
 }
 

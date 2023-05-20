@@ -14,8 +14,8 @@ void UWallF1GameInstance::Init()
 	LoadConfigFile(WallF1Config);	
 
 	// Instanced in blueprint
-	//SensorHandler = NewObject<UWallF1SensorHandler>();
-	//SensorHandler->Initialize(WallF1Config);
+	SensorHandler = NewObject<UWallF1SensorHandler>();
+	SensorHandler->Initialize(WallF1Config);
 
 	Super::Init();
 }
