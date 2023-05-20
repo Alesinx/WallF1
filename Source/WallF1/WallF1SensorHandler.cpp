@@ -11,7 +11,7 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Name = TEXT("Mqtt actor");
 	//MqttActor = GetWorld()->SpawnActor<AMqttActor>(SpawnParams);
-	MqttActor = NewObject<AMqttActor>();
+	MqttActor = NewObject<UMqttActor>();
 
 	if (MqttActor)
 	{
@@ -19,6 +19,10 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 		MqttActor->CreateClient(clientID, WallF1Config.Host, WallF1Config.Port);
 
 		MqttActor->Connect();
+
+		MqttActor->OnMessageReceivedNative.AddDynamic(this, &UWallF1SensorHandler::OnMessageReceived);
+
+		MqttActor->Subscribe(WallF1Config.TopicToSubscribeTo, WallF1Config.QoS);
 	}
 	
 	//FMQTTURL mqttUrl;
@@ -217,6 +221,68 @@ bool UWallF1SensorHandler::AreAllSensorsOff()
 
 void UWallF1SensorHandler::Tick(float DeltaTime)
 {
+	PurgePendingMessageQueue();
+	PublishPendingMessage();
+}
+
+void UWallF1SensorHandler::QueueMessage(const FString& PayloadString)
+{
+	if(publishInmediatly)
+	{
+		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
+		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("REQUESTING MESSAGE PUBLISH: %s"), *PayloadString);
+
+		FWallF1PendingMessage PendingMessage;
+		PendingMessage.Payload = PayloadString;
+		PendingMessage.bPublishRequested = false;
+		PendingMessage.bAcknowledged = false;
+		PendingMessage.TimeStamp = FDateTime::UtcNow().ToUnixTimestamp();
+		PendingMessageQueue.Add(PendingMessage);
+	}
+}
+
+void UWallF1SensorHandler::OnMessageReceived(FString Payload)
+{
+	UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *Payload);
+
+	bool bIsACK = Payload.Contains("ACK");
+	if (bIsACK)
+		HandleACKReceived();
+	else
+	{
+		// Parse json message
+		FWallF1SensorResponse SensorResponse;
+		FJsonObjectConverter::JsonObjectStringToUStruct(Payload, &SensorResponse);
+
+		// Broadcast delegate
+		OnSensorDetection.Broadcast(SensorResponse.idSensor);
+	}
+}
+
+void UWallF1SensorHandler::OnConnected()
+{
+}
+
+void UWallF1SensorHandler::HandleACKReceived()
+{
+	if (PendingMessageQueue.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Recived ACK but pending message queue is empty!"))
+			return;
+	}
+
+	if(!publishInmediatly)
+	{
+		PendingMessageQueue[0].bAcknowledged = true;
+	}
+}
+
+void UWallF1SensorHandler::PurgePendingMessageQueue()
+{
 	// Remove any acknowledged or expired message
 	if (!PendingMessageQueue.IsEmpty())
 	{
@@ -232,72 +298,21 @@ void UWallF1SensorHandler::Tick(float DeltaTime)
 		{
 			UE_LOG(LogTemp, Fatal, TEXT("Pending message acknowledgment expired. State of games is unreliable"))
 
-			// Dequeue
-			PendingMessageQueue.RemoveAt(0);
+				// Dequeue
+				PendingMessageQueue.RemoveAt(0);
 		}
 	}
+}
 
-	// If the queue is still not empty after the potential deque above and the first message publishing is not requested, request publishing of the first message
+void UWallF1SensorHandler::PublishPendingMessage()
+{
 	if (!PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;
+
 		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
-		//const uint32 size = PayloadString.Len();
-
-		//TArray<uint8> PayloadBytes;
-		//PayloadBytes.AddUninitialized(size);
-		//StringToBytes(PayloadString, PayloadBytes.GetData(), size);
-
-		//BPPublish(WallF1Config.TopicToPublishIn, TArray<uint8>((uint8*)TCHAR_TO_UTF8(*PayloadString), PayloadString.Len()), EMQTTQualityOfService::ExactlyOnce);
 
 		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
-
 		PendingMessageQueue[0].bPublishRequested = true;
 	}
-}
-
-void UWallF1SensorHandler::QueueMessage(const FString& Message)
-{
-	UE_LOG(LogTemp, Display, TEXT("REQUESTING MESSAGE PUBLISH: %s"), *Message);
-
-	FWallF1PendingMessage PendingMessage;
-	PendingMessage.Payload = Message;
-	PendingMessage.bPublishRequested = false;
-	PendingMessage.bAcknowledged = false;
-	PendingMessage.TimeStamp = FDateTime::UtcNow().ToUnixTimestamp();
-	PendingMessageQueue.Add(PendingMessage);
-}
-
-void UWallF1SensorHandler::OnMessageReceived()
-{
-	//FString receivedPayload = message.GetPayloadAsString();
-	//UE_LOG(LogTemp, Display, TEXT("MESSAGE RECEIVED: %s"), *receivedPayload);
-
-	//bool bIsACK = receivedPayload.Contains("ACK");
-	//if (bIsACK)
-	//	HandleACKReceived();
-	//else
-	//{
-	//	// Parse json message
-	//	FWallF1SensorResponse SensorResponse;
-	//	FJsonObjectConverter::JsonObjectStringToUStruct(receivedPayload, &SensorResponse);
-
-	//	// Broadcast delegate
-	//	OnSensorDetection.Broadcast(SensorResponse.idSensor);
-	//}
-}
-
-void UWallF1SensorHandler::OnConnected()
-{
-}
-
-void UWallF1SensorHandler::HandleACKReceived()
-{
-	if (PendingMessageQueue.IsEmpty())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Recived ACK but pending message queue is empty!"))
-			return;
-	}
-
-	PendingMessageQueue[0].bAcknowledged = true;
 }

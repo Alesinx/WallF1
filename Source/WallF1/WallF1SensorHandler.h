@@ -7,7 +7,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSensorDetection, int, SensorId);
 
-class AMqttActor;
+class UMqttActor;
 
 UENUM(BlueprintType)
 enum class EWallF1SensorState : uint8
@@ -82,6 +82,7 @@ class WALLF1_API UWallF1SensorHandler : public UObject, public FTickableGameObje
 {
 	GENERATED_BODY()
 
+// PUBLIC ///////////////////////////////////////////////////////////////////////
 public:
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void Initialize(FWallF1Config InConfig);
@@ -106,37 +107,24 @@ public:
 	UPROPERTY()
 	FOnSensorDetection OnSensorDetection;
 
-protected:
-	//UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
-	//AMqttActor* MqttClient;
 
+// PROTECTED /////////////////////////////////////////////////////////////////////////
+protected: //properties
 	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
-	AMqttActor* MqttActor;
+	UMqttActor* MqttActor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "WallF1 MQTT")
 	FWallF1Config WallF1Config;
 
-protected:
-	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	//void BPConnect();
-
-	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	//void BPSubscribe(UPARAM(DisplayName = "Topic") const FString& InTopic,
-	//	UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce);
-
-	//UFUNCTION(BlueprintImplementableEvent, Category = "WallF1 MQTT")
-	//void BPPublish(UPARAM(DisplayName = "Topic") const FString& InTopic,
-	//	UPARAM(DisplayName = "Payload") const TArray<uint8>& InPayload,
-	//	UPARAM(DisplayName = "Quality of Service") EMQTTQualityOfService InQoS = EMQTTQualityOfService::ExactlyOnce,
-	//	const bool bInRetain = false);
-
+protected: //methods
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
-	void OnMessageReceived();
+	void OnMessageReceived(FString Payload);
 
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void OnConnected();
 
-private:
+// PRIVATE //////////////////////////////////////////////////////////////////////////
+private: //properties
 	UPROPERTY()
 	EWallF1SensorState SensorsState[9];
 
@@ -145,28 +133,23 @@ private:
 
 	static FWallF1SensorColor DefaultDisplayColor;
 
-	//FOnConnectDelegate ConnectDelegate;
-	//FOnPublishDelegate MessagePublishDelegate;
-	//FOnSubscribeDelegate SubscribeDelegate;
-	//FOnMessageDelegate MessageReceivedDelegate;
+	bool publishInmediatly = true;
 
+private: //methods
 	void Tick(float DeltaTime);
 	virtual bool IsTickable() const override { return true; };
 	virtual TStatId GetStatId() const override { return TStatId(); }
 	virtual bool IsTickableInEditor() const override { return true; }
 
 	UFUNCTION()
-	void QueueMessage(const FString& Message);
-
-	//UFUNCTION()
-	//void OnClientConnected();
-
-	//UFUNCTION()
-	//void OnMessagePublished(int mid);
-
-	//UFUNCTION()
-	//void OnSubscribed(int mid, const TArray<int>& qos);	
+	void QueueMessage(const FString& PayloadString);
 
 	UFUNCTION()
 	void HandleACKReceived();
+
+	UFUNCTION()
+	void PurgePendingMessageQueue();
+
+	UFUNCTION()
+	void PublishPendingMessage();
 };
