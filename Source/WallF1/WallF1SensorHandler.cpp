@@ -36,12 +36,6 @@ void UWallF1SensorHandler::OnClientConnected()
 
 void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":%i}"), SensorId);
 	QueueMessage(PayloadString);
 
@@ -50,12 +44,6 @@ void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 
 void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
 	QueueMessage(PayloadString);
 
@@ -64,12 +52,6 @@ void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 
 void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 {
-	if (!MqttActor)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-		return;
-	}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
 
@@ -78,12 +60,6 @@ void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
 	QueueMessage(PayloadString);
 
@@ -92,12 +68,6 @@ void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 
 void UWallF1SensorHandler::EnableAllSensorsDetection()
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"idSensor\":0}"));
 	QueueMessage(PayloadString);
 
@@ -109,12 +79,6 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 
 void UWallF1SensorHandler::DisableAllSensorsDetection()
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":0}"));
 	QueueMessage(PayloadString);
 
@@ -126,12 +90,6 @@ void UWallF1SensorHandler::DisableAllSensorsDetection()
 
 void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
 
@@ -143,13 +101,6 @@ void UWallF1SensorHandler::TurnOnAllLeds(FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::TurnOffAllLeds()
 {
-
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":0,\"r\":0,\"g\":0,\"b\":0}"));
 	QueueMessage(PayloadString);
 
@@ -166,12 +117,6 @@ void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
 
 void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InColor)
 {
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient needs to be initialized"));
-	//	return;
-	//}
-
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
 }
@@ -196,7 +141,7 @@ void UWallF1SensorHandler::Tick(float DeltaTime)
 
 void UWallF1SensorHandler::QueueMessage(const FString& PayloadString)
 {
-	if(publishInmediatly)
+	if(WaitForACKs)
 	{
 		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
 		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
@@ -220,7 +165,13 @@ void UWallF1SensorHandler::OnMessageReceived(FString Payload)
 
 	bool bIsACK = Payload.Contains("ACK");
 	if (bIsACK)
-		HandleACKReceived();
+	{
+		if(WaitForACKs)
+		{
+			HandleACKReceived();
+		}
+		//else  ignore the mesasge
+	}
 	else
 	{
 		// Parse json message
@@ -234,14 +185,14 @@ void UWallF1SensorHandler::OnMessageReceived(FString Payload)
 
 void UWallF1SensorHandler::HandleACKReceived()
 {
-	if (PendingMessageQueue.IsEmpty())
+	if (WaitForACKs)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Recived ACK but pending message queue is empty!"))
-			return;
-	}
+		if (PendingMessageQueue.IsEmpty())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Recived ACK but pending message queue is empty!"))
+				return;
+		}
 
-	if(!publishInmediatly)
-	{
 		PendingMessageQueue[0].bAcknowledged = true;
 	}
 }
@@ -249,7 +200,7 @@ void UWallF1SensorHandler::HandleACKReceived()
 void UWallF1SensorHandler::PurgePendingMessageQueue()
 {
 	// Remove any acknowledged or expired message
-	if (!PendingMessageQueue.IsEmpty())
+	if (ready && WaitForACKs && !PendingMessageQueue.IsEmpty())
 	{
 		if (PendingMessageQueue[0].bAcknowledged)
 		{
@@ -263,21 +214,31 @@ void UWallF1SensorHandler::PurgePendingMessageQueue()
 		{
 			UE_LOG(LogTemp, Fatal, TEXT("Pending message acknowledgment expired. State of games is unreliable"))
 
-				// Dequeue
-				PendingMessageQueue.RemoveAt(0);
+			// Dequeue
+			PendingMessageQueue.RemoveAt(0);
 		}
 	}
 }
 
 void UWallF1SensorHandler::PublishPendingMessage()
 {
-	if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
+	if (ready && !PendingMessageQueue.IsEmpty())
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;
 
 		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
 
 		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
-		PendingMessageQueue[0].bPublishRequested = true;
+		PendingMessageQueue.RemoveAt(0);
 	}
+
+	//if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
+	//{
+	//	const FString PayloadString = PendingMessageQueue[0].Payload;
+
+	//	UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
+
+	//	MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
+	//	PendingMessageQueue[0].bPublishRequested = true;
+	//}
 }

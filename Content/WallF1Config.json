@@ -3,6 +3,6 @@
     "Port" : 1883,
     "TopicToPublishIn" : "tikonos/detector",
     "TopicToSubscribeTo" : "tikonos/visualizer",
-    "GameDurationInSeconds" : 120,
+    "GameDurationInSeconds" : 30,
     "StandByTimerInSeconds" : 10
 }

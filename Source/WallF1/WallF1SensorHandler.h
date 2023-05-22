@@ -130,7 +130,7 @@ private: //properties
 
 	static FWallF1SensorColor DefaultDisplayColor;
 
-	bool publishInmediatly = false;
+	bool WaitForACKs = false;
 
 private: //methods
 	void Tick(float DeltaTime);
