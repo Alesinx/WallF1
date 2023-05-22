@@ -73,12 +73,14 @@ void UMqttActor::Tick(float DeltaTime)
 		m_bDoReconnect = false;
 		Start_Consuming();
 		OnConnected();
+		OnConnectedNative();
 	}
 	if (fails.size() > 0)
 	{
 		if (fails.back().ptr == this)
 		{
 			OnConnectedFail(fails.back().msg);
+			OnConnectedFailedNative();
 			fails.pop_back();
 		}
 	}
@@ -102,8 +104,18 @@ UMqttActor::~UMqttActor()
 
 void UMqttActor::OnReceiveNative(const FString& sTopic, const TArray<uint8>& sMsg)
 {
-	FString Payload = FString::FromHexBlob(sMsg.GetData(), sMsg.Num());
-	OnMessageReceivedNative.Broadcast(Payload);
+	FString Payload = UMqttActor::ConvertToString(sMsg);
+	OnMessageReceivedNativeDelegate.Broadcast(Payload);
+}
+
+void UMqttActor::OnConnectedNative()
+{
+	OnConnectedDelegate.Broadcast();
+}
+
+void UMqttActor::OnConnectedFailedNative()
+{
+	OnConnectedFailedDelegate.Broadcast();
 }
 
 EMqttCode UMqttActor::CreateClient(FString In_sClientID, FString In_sTcpAddress, int32 In_iPort, EMqttConnection In_connection)

@@ -61,6 +61,8 @@ public:
 
 	virtual void Init() override;
 
+	virtual void Shutdown() override;
+
 	UFUNCTION(BlueprintCallable, Category = "WallF1 Game Instance")
 	void LoadInGameLevel(EWallF1GameMode GameMode);
 

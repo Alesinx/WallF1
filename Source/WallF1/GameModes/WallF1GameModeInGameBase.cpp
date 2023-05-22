@@ -39,7 +39,6 @@ void AWallF1GameModeInGameBase::StartPlay()
 	else
 		UIWidgetClass = CachedGameInstance->GetInGameWidgetClass();
 
-
 	if (!UIWidgetClass)
 		UE_LOG(LogTemp, Fatal, TEXT("Could not create UI widget. UI widget class reference was null"));
 

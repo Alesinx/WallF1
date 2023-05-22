@@ -17,6 +17,8 @@
 #include "MqttActor.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMessageReceivedNative, FString, Payload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnConnected);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnConnectedFailed);
 
 UENUM(BlueprintType)
 enum class EMqttCode : uint8
@@ -35,6 +37,8 @@ enum class EMqttConnection : uint8
 	MQTT_WS,
 	MQTT_WSS,
 };
+
+typedef std::chrono::system_clock::time_point TimePoint;
 
 UCLASS()
 class BPMQTT_API UMqttActor : public UObject, public FTickableGameObject
@@ -56,7 +60,13 @@ public:
 	};
 
 	UPROPERTY()
-	FOnMessageReceivedNative OnMessageReceivedNative;
+	FOnMessageReceivedNative OnMessageReceivedNativeDelegate;
+
+	UPROPERTY()
+	FOnConnected OnConnectedDelegate;
+
+	UPROPERTY()
+	FOnConnectedFailed OnConnectedFailedDelegate;
 
 public:
 	// Called every frame
@@ -126,6 +136,10 @@ public:
 
 	virtual void OnReceiveNative(const FString& sTopic, const TArray<uint8>& sMsg);
 
+	virtual void OnConnectedNative();
+
+	virtual void OnConnectedFailedNative();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "mqtt")
 	void OnConnected();
 
@@ -148,16 +162,17 @@ private:
 
 	EMqttCode Try_consume_message(FString& Out_sTopic, TArray<uint8>& Out_sMsg);
 
-	bool m_bmqtt = false, m_bmqtt2, m_bInit = false, m_bDoReconnect = false;
+	bool m_bmqtt = false;
+	bool m_bmqtt2;
+	bool m_bInit = false;
+	bool m_bDoReconnect = false;
 	int32 m_iConnectTimeout;
 	bool m_bCleanSession;
-	std::chrono::system_clock::time_point m_tpConnect;
-
+	TimePoint m_tpConnect;
 	MQTTAsync client = nullptr;
 	MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 	MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
 	MQTTAsync_responseOptions res_opts = MQTTAsync_responseOptions_initializer;
 	MQTTAsync_message msg = MQTTAsync_message_initializer;
-
 	int rc;
 };

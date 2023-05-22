@@ -17,7 +17,19 @@ void UWallF1GameInstance::Init()
 	SensorHandler = NewObject<UWallF1SensorHandler>();
 	SensorHandler->Initialize(WallF1Config);
 
+	SensorHandler->AddToRoot();
+
 	Super::Init();
+}
+
+void UWallF1GameInstance::Shutdown()
+{
+	if(SensorHandler)
+	{
+		SensorHandler->RemoveFromRoot();
+	}
+
+	Super::Shutdown();
 }
 
 void UWallF1GameInstance::LoadInGameLevel(EWallF1GameMode GameMode)

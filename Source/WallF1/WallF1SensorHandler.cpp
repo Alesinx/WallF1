@@ -18,51 +18,20 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 		FString clientID = TEXT("client");
 		MqttActor->CreateClient(clientID, WallF1Config.Host, WallF1Config.Port);
 
+		MqttActor->OnMessageReceivedNativeDelegate.AddDynamic(this, &UWallF1SensorHandler::OnMessageReceived);
+		MqttActor->OnConnectedDelegate.AddDynamic(this, &UWallF1SensorHandler::OnClientConnected);
+
 		MqttActor->Connect();
-
-		MqttActor->OnMessageReceivedNative.AddDynamic(this, &UWallF1SensorHandler::OnMessageReceived);
-
-		MqttActor->Subscribe(WallF1Config.TopicToSubscribeTo, WallF1Config.QoS);
 	}
-	
-	//FMQTTURL mqttUrl;
-	//mqttUrl.Host = WallF1Config.Host;
-	//InConfig.Port = WallF1Config.Port;
+}
 
-	//MqttClient = UMQTTSubsystem::GetOrCreateClient(this, mqttUrl);
-
-	//BPConnect();
-	//BPSubscribe(WallF1Config.TopicToSubscribeTo, static_cast<EMQTTQualityOfService>(WallF1Config.QoS));
-
-	//WallF1Config = InConfig;
-	//FMqttClientConfig config;
-	//config.HostUrl = WallF1Config.Host;
-	//config.Port = WallF1Config.Port;
-	//config.ClientId = "User";
-	//config.EventLoopDeltaMs = -1;
-	//MqttClient = UMqttUtilitiesBPL::CreateMqttClient(config);
-	//if (!MqttClient)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("MqttClient could not be initialized"));
-	//	return;
-	//}
-
-	//FMqttConnectionData ConnectionData;
-	//ConnectionData.Login = "";
-	//ConnectionData.Password = "";
-
-	//ConnectDelegate.BindUFunction(this, FName("OnClientConnected"));
-	//MqttClient->Connect(ConnectionData, ConnectDelegate);
-
-	//MessagePublishDelegate.BindUFunction(this, FName("OnMessagePublished"));
-
-	//MqttClient->SetOnPublishHandler(MessagePublishDelegate);
-	//SubscribeDelegate.BindUFunction(this, FName("OnSubscribed"));
-	//MqttClient->SetOnSubscribeHandler(SubscribeDelegate);
-	//MqttClient->Subscribe(WallF1Config.TopicToSubscribeTo, 0);
-
-	//MessageReceivedDelegate.BindUFunction(this, FName("OnMessageReceived"));
-	//MqttClient->SetOnMessageHandler(MessageReceivedDelegate);
+void UWallF1SensorHandler::OnClientConnected()
+{
+	if(MqttActor)
+	{
+		MqttActor->Subscribe(WallF1Config.TopicToSubscribeTo, WallF1Config.QoS);
+		ready = true;
+	}
 }
 
 void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
@@ -263,10 +232,6 @@ void UWallF1SensorHandler::OnMessageReceived(FString Payload)
 	}
 }
 
-void UWallF1SensorHandler::OnConnected()
-{
-}
-
 void UWallF1SensorHandler::HandleACKReceived()
 {
 	if (PendingMessageQueue.IsEmpty())
@@ -306,7 +271,7 @@ void UWallF1SensorHandler::PurgePendingMessageQueue()
 
 void UWallF1SensorHandler::PublishPendingMessage()
 {
-	if (!PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
+	if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;
 

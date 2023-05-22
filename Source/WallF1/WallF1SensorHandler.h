@@ -120,9 +120,6 @@ protected: //methods
 	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
 	void OnMessageReceived(FString Payload);
 
-	UFUNCTION(BlueprintCallable, Category = "WallF1 MQTT")
-	void OnConnected();
-
 // PRIVATE //////////////////////////////////////////////////////////////////////////
 private: //properties
 	UPROPERTY()
@@ -133,7 +130,7 @@ private: //properties
 
 	static FWallF1SensorColor DefaultDisplayColor;
 
-	bool publishInmediatly = true;
+	bool publishInmediatly = false;
 
 private: //methods
 	void Tick(float DeltaTime);
@@ -152,4 +149,9 @@ private: //methods
 
 	UFUNCTION()
 	void PublishPendingMessage();
+
+	UFUNCTION()
+	void OnClientConnected();
+
+	bool ready = false;
 };
