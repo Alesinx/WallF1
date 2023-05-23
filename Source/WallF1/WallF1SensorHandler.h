@@ -99,7 +99,7 @@ public:
 
 	void SetDefaultDisplayColor(FWallF1SensorColor InColor);
 
-	void SetDetectionColor(uint8 SensorId, FWallF1SensorColor InColor);
+	void SetSensorDetectionColor(uint8 SensorId, FWallF1SensorColor InColor);
 	void SetDetectionColorOfAllSensors(FWallF1SensorColor InColor);
 
 	bool AreAllSensorsOff();

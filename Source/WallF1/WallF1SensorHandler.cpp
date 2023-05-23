@@ -73,7 +73,7 @@ void UWallF1SensorHandler::EnableAllSensorsDetection()
 
 	for (int i = 0; i < 9; ++i)
 	{
-		SensorsState[i] = EWallF1SensorState::OFF;
+		SensorsState[i] = EWallF1SensorState::DETECTION_ENABLED;
 	}
 }
 
@@ -118,6 +118,12 @@ void UWallF1SensorHandler::SetDefaultDisplayColor(FWallF1SensorColor InColor)
 void UWallF1SensorHandler::SetDetectionColorOfAllSensors(FWallF1SensorColor InColor)
 {
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":0,\"r\":%i,\"g\":%i,\"b\":%i}"), InColor.r, InColor.g, InColor.b);
+	QueueMessage(PayloadString);
+}
+
+void UWallF1SensorHandler::SetSensorDetectionColor(uint8 SensorId, FWallF1SensorColor InColor)
+{
+	const FString PayloadString = FString::Printf(TEXT("{\"modo\":3,\"idSensor\":%i,\"r\":%i,\"g\":%i,\"b\":%i}"), SensorId, InColor.r, InColor.g, InColor.b);
 	QueueMessage(PayloadString);
 }
 

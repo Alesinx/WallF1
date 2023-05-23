@@ -14,27 +14,37 @@ void AWallF1GameModeInGameTopScore::StartWallF1Game()
 	red.r = 255;
 	red.g = 0;
 	red.b = 0;
-	CachedSensorHandler->TurnOnLed(5, red);
-
-	FWallF1SensorColor orange = FWallF1SensorColor();
-	orange.r = 255;
-	orange.g = 100;
-	orange.b = 0;
-	CachedSensorHandler->TurnOnLed(4, orange);
-	CachedSensorHandler->TurnOnLed(6, orange);
-	CachedSensorHandler->TurnOnLed(2, orange);
-	CachedSensorHandler->TurnOnLed(8, orange);
 
 	FWallF1SensorColor yellow = FWallF1SensorColor();
 	yellow.r = 255;
 	yellow.g = 255;
 	yellow.b = 0;
-	CachedSensorHandler->TurnOnLed(1, yellow);
-	CachedSensorHandler->TurnOnLed(3, yellow);
-	CachedSensorHandler->TurnOnLed(7, yellow);
-	CachedSensorHandler->TurnOnLed(9, yellow);
+
+	CachedSensorHandler->SetSensorDetectionColor(1, red);
+	CachedSensorHandler->SetSensorDetectionColor(3, red);
+	CachedSensorHandler->SetSensorDetectionColor(7, red);
+	CachedSensorHandler->SetSensorDetectionColor(9, red);
+
+	CachedSensorHandler->SetSensorDetectionColor(2, yellow);
+	CachedSensorHandler->SetSensorDetectionColor(4, yellow);
+	CachedSensorHandler->SetSensorDetectionColor(5, yellow);
+	CachedSensorHandler->SetSensorDetectionColor(6, yellow);
+	CachedSensorHandler->SetSensorDetectionColor(8, yellow);
+
+	CachedSensorHandler->EnableAllSensorsDetection();
 }
 
 void AWallF1GameModeInGameTopScore::HandleSensorDetection(int SensorId)
 {
+	CachedSensorHandler->DisableSensorDetection(SensorId);
+	CachedSensorHandler->EnableSensorDetection(SensorId);
+
+	if(SensorId == 1  || SensorId == 3 || SensorId == 7 || SensorId == 9)
+	{
+		IncreaseScore(3);
+	}
+	else
+	{
+		IncreaseScore(1);
+	}
 }
