@@ -10,6 +10,12 @@ void AWallF1GameModeInGameRandom::StartWallF1Game()
 {
 	UE_LOG(LogTemp, Display, TEXT("RANDOM GAME MODE STARTED"));
 
+	FWallF1SensorColor blue = FWallF1SensorColor();
+	blue.r = 0;
+	blue.g = 0;
+	blue.b = 255;
+	CachedSensorHandler->SetDetectionColorOfAllSensors(blue);
+	
 	int RndSensor = FMath::RandRange(1, 9);
 	CachedSensorHandler->EnableSensorDetection(RndSensor);
 }

@@ -8,9 +8,10 @@ void UWallF1SensorHandler::Initialize(FWallF1Config InConfig)
 {
 	WallF1Config = InConfig;
 
+	initialized = true;
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Name = TEXT("Mqtt actor");
-	//MqttActor = GetWorld()->SpawnActor<AMqttActor>(SpawnParams);
 	MqttActor = NewObject<UMqttActor>();
 
 	if (MqttActor)
@@ -42,12 +43,37 @@ void UWallF1SensorHandler::EnableSensorDetection(uint8 SensorId)
 	SensorsState[SensorId - 1] = EWallF1SensorState::DETECTION_ENABLED;
 }
 
+void UWallF1SensorHandler::EnableSensorDetection(TArray<uint8> SensorIds)
+{
+	if (!SensorIds.IsEmpty())
+	{
+		FString idList = "";
+		for (uint8 id : SensorIds)
+		{
+			if (!idList.IsEmpty())
+			{
+				idList.Append(",");
+			}
+			idList.Append(FString::Printf(TEXT("%d"), id));
+
+			SensorsState[id - 1] = EWallF1SensorState::DETECTION_ENABLED;
+		}
+
+		const FString PayloadString = FString::Printf(TEXT("{\"modo\":0,\"sensor\":[%s]}"), *idList);
+		QueueMessage(PayloadString);
+	}
+}
+
 void UWallF1SensorHandler::DisableSensorDetection(uint8 SensorId)
 {
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":1,\"idSensor\":%i}"), SensorId);
 	QueueMessage(PayloadString);
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
+}
+
+void UWallF1SensorHandler::DisableSensorDetection(TArray<uint8> SensorIds)
+{
 }
 
 void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
@@ -58,6 +84,10 @@ void UWallF1SensorHandler::TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor)
 	SensorsState[SensorId - 1] = EWallF1SensorState::LED_ON;
 }
 
+void UWallF1SensorHandler::TurnOnLed(TArray<uint8> SensorIds, FWallF1SensorColor InColor)
+{
+}
+
 void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 {
 	const FString PayloadString = FString::Printf(TEXT("{\"modo\":2,\"idSensor\":%i,\"r\":0,\"g\":0,\"b\":0}"), SensorId);
@@ -65,6 +95,11 @@ void UWallF1SensorHandler::TurnOffLed(uint8 SensorId)
 
 	SensorsState[SensorId - 1] = EWallF1SensorState::OFF;
 }
+
+void UWallF1SensorHandler::TurnOffLed(TArray<uint8> SensorIds)
+{
+}
+
 
 void UWallF1SensorHandler::EnableAllSensorsDetection()
 {
@@ -141,18 +176,16 @@ bool UWallF1SensorHandler::AreAllSensorsOff()
 
 void UWallF1SensorHandler::Tick(float DeltaTime)
 {
-	PurgePendingMessageQueue();
-	PublishPendingMessage();
+	if (initialized)
+	{
+		PurgePendingMessageQueue();
+		TrytoPublishPendingMessage();
+	}
 }
 
 void UWallF1SensorHandler::QueueMessage(const FString& PayloadString)
 {
 	if(WaitForACKs)
-	{
-		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
-		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
-	}
-	else
 	{
 		UE_LOG(LogTemp, Display, TEXT("REQUESTING MESSAGE PUBLISH: %s"), *PayloadString);
 
@@ -162,6 +195,11 @@ void UWallF1SensorHandler::QueueMessage(const FString& PayloadString)
 		PendingMessage.bAcknowledged = false;
 		PendingMessage.TimeStamp = FDateTime::UtcNow().ToUnixTimestamp();
 		PendingMessageQueue.Add(PendingMessage);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
+		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
 	}
 }
 
@@ -176,7 +214,7 @@ void UWallF1SensorHandler::OnMessageReceived(FString Payload)
 		{
 			HandleACKReceived();
 		}
-		//else  ignore the mesasge
+		//else  ignore the message
 	}
 	else
 	{
@@ -211,40 +249,33 @@ void UWallF1SensorHandler::PurgePendingMessageQueue()
 		if (PendingMessageQueue[0].bAcknowledged)
 		{
 			if (!PendingMessageQueue[0].bPublishRequested)
-				UE_LOG(LogTemp, Fatal, TEXT("Not published pending message was acknowledged. State of games is unreliable"))
+			{
+				UE_LOG(LogTemp, Error, TEXT("Not published pending message was acknowledged. State of games is unreliable"))
+			}
 
-				// Dequeue
-				PendingMessageQueue.RemoveAt(0);
+			PendingMessageQueue.RemoveAt(0);
 		}
 		else if (FDateTime::UtcNow().ToUnixTimestamp() - PendingMessageQueue[0].TimeStamp >= 2000)
 		{
-			UE_LOG(LogTemp, Fatal, TEXT("Pending message acknowledgment expired. State of games is unreliable"))
-
-			// Dequeue
+			UE_LOG(LogTemp, Error, TEXT("Pending message acknowledgment expired. State of games is unreliable"))
 			PendingMessageQueue.RemoveAt(0);
 		}
 	}
 }
 
-void UWallF1SensorHandler::PublishPendingMessage()
+void UWallF1SensorHandler::TrytoPublishPendingMessage()
 {
-	if (ready && !PendingMessageQueue.IsEmpty())
+	UE_LOG(LogTemp, Warning, TEXT("Name of the instance: %s"), *this->GetName())
+	if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;
 
 		UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
 
 		MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
-		PendingMessageQueue.RemoveAt(0);
+		if(WaitForACKs)
+		{
+			PendingMessageQueue[0].bPublishRequested = true;
+		}
 	}
-
-	//if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
-	//{
-	//	const FString PayloadString = PendingMessageQueue[0].Payload;
-
-	//	UE_LOG(LogTemp, Display, TEXT("ACTUALLY PUBLISHING MESSAGE: %s"), *PayloadString);
-
-	//	MqttActor->Publish(WallF1Config.TopicToPublishIn, PayloadString, WallF1Config.QoS);
-	//	PendingMessageQueue[0].bPublishRequested = true;
-	//}
 }

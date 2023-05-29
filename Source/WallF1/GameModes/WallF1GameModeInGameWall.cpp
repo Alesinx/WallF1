@@ -10,6 +10,11 @@ void AWallF1GameModeInGameWall::StartWallF1Game()
 {
 	UE_LOG(LogTemp, Display, TEXT("WALL GAME MODE STARTED"));
 
+	FWallF1SensorColor yellow = FWallF1SensorColor();
+	yellow.r = 255;
+	yellow.g = 255;
+	yellow.b = 0;
+	CachedSensorHandler->SetDetectionColorOfAllSensors(yellow);
 	CachedSensorHandler->EnableAllSensorsDetection();
 }
 

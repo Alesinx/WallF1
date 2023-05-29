@@ -75,6 +75,7 @@ void UMqttActor::Tick(float DeltaTime)
 		OnConnected();
 		OnConnectedNative();
 	}
+
 	if (fails.size() > 0)
 	{
 		if (fails.back().ptr == this)

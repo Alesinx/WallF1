@@ -20,7 +20,7 @@ class WALLF1_API AWallF1GameModeInGamePuzzle : public AWallF1GameModeInGameBase
 	void HandleSensorDetection(int SensorId) override;
 
 private:
-	TArray<int> SensorsIds;
+	TArray<uint8> SensorsIds;
 
-	TArray<int> GetNRandomSensors(int InN);
+	TArray<uint8> GetNRandomSensors(int InN);
 };

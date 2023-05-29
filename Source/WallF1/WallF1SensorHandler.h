@@ -88,9 +88,16 @@ public:
 	void Initialize(FWallF1Config InConfig);
 
 	void EnableSensorDetection(uint8 SensorId);
+	void EnableSensorDetection(TArray<uint8> SensorIds);
+
 	void DisableSensorDetection(uint8 SensorId);
+	void DisableSensorDetection(TArray<uint8> SensorIds);
+
 	void TurnOnLed(uint8 SensorId, FWallF1SensorColor InColor = DefaultDisplayColor);
+	void TurnOnLed(TArray<uint8> SensorIds, FWallF1SensorColor InColor = DefaultDisplayColor);
+
 	void TurnOffLed(uint8 SensorId);
+	void TurnOffLed(TArray<uint8> SensorIds);
 
 	void EnableAllSensorsDetection();
 	void DisableAllSensorsDetection();
@@ -130,7 +137,7 @@ private: //properties
 
 	static FWallF1SensorColor DefaultDisplayColor;
 
-	bool WaitForACKs = false;
+	bool WaitForACKs = true;
 
 private: //methods
 	void Tick(float DeltaTime);
@@ -148,10 +155,11 @@ private: //methods
 	void PurgePendingMessageQueue();
 
 	UFUNCTION()
-	void PublishPendingMessage();
+	void TrytoPublishPendingMessage();
 
 	UFUNCTION()
 	void OnClientConnected();
 
 	bool ready = false;
+	bool initialized = false;
 };

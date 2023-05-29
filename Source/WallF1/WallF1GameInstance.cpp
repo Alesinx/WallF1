@@ -17,17 +17,18 @@ void UWallF1GameInstance::Init()
 	SensorHandler = NewObject<UWallF1SensorHandler>();
 	SensorHandler->Initialize(WallF1Config);
 
-	SensorHandler->AddToRoot();
+	//SensorHandler->AddToRoot();
 
 	Super::Init();
 }
 
 void UWallF1GameInstance::Shutdown()
 {
-	if(SensorHandler)
-	{
-		SensorHandler->RemoveFromRoot();
-	}
+	//if(SensorHandler)
+	//{
+	//	SensorHandler->RemoveFromRoot();
+	//}
+	if (SensorHandler) SensorHandler->ConditionalBeginDestroy();
 
 	Super::Shutdown();
 }

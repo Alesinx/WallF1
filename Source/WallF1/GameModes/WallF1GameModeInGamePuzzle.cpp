@@ -8,7 +8,7 @@ AWallF1GameModeInGamePuzzle::AWallF1GameModeInGamePuzzle() : Super()
 	// Populate Sensor IDs
 	for(int i = 1; i <= 9; ++i)
 	{
-		SensorsIds.Add(i);
+		SensorsIds.Add((uint8)i);
 	}
 }
 
@@ -16,11 +16,18 @@ void AWallF1GameModeInGamePuzzle::StartWallF1Game()
 {
 	UE_LOG(LogTemp, Display, TEXT("PUZZLE GAME MODE STARTED"));
 
-	TArray<int> RandomSensors = GetNRandomSensors(3);
-	for(int id : RandomSensors)
-	{
-		CachedSensorHandler->EnableSensorDetection(id);
-	}
+	FWallF1SensorColor green = FWallF1SensorColor();
+	green.r = 0;
+	green.g = 255;
+	green.b = 0;
+	CachedSensorHandler->SetDetectionColorOfAllSensors(green);
+
+	TArray<uint8> RandomSensors = GetNRandomSensors(3);
+	CachedSensorHandler->EnableSensorDetection(RandomSensors);
+	//for(int id : RandomSensors)
+	//{
+	//	CachedSensorHandler->EnableSensorDetection(id);
+	//}
 }
 
 void AWallF1GameModeInGamePuzzle::HandleSensorDetection(int SensorId)
@@ -31,15 +38,16 @@ void AWallF1GameModeInGamePuzzle::HandleSensorDetection(int SensorId)
 	if (CachedSensorHandler->AreAllSensorsOff())
 	{
 		IncreaseScore(3);
-		TArray<int> RandomSensors = GetNRandomSensors(3);
-		for (int id : RandomSensors)
-		{
-			CachedSensorHandler->EnableSensorDetection(id);
-		}
+		TArray<uint8> RandomSensors = GetNRandomSensors(3);
+		CachedSensorHandler->EnableSensorDetection(RandomSensors);
+		//for (int id : RandomSensors)
+		//{
+		//	CachedSensorHandler->EnableSensorDetection(id);
+		//}
 	}
 }
 
-TArray<int> AWallF1GameModeInGamePuzzle::GetNRandomSensors(int InN)
+TArray<uint8> AWallF1GameModeInGamePuzzle::GetNRandomSensors(int InN)
 {
 	// Sort using a custom predicate that returns true/false randomly
 	SensorsIds.Sort([this](const int Item1, const int Item2) {
@@ -47,10 +55,11 @@ TArray<int> AWallF1GameModeInGamePuzzle::GetNRandomSensors(int InN)
 	});
 
 	// Return the first N elements
-	TArray<int> Out;
+	TArray<uint8> Out;
 	for(int i = 0; i < InN; ++i)
 	{
-		Out.Add(SensorsIds[i]);
+		Out.Add((uint8)SensorsIds[i]);
 	}
+
 	return Out;
 }
