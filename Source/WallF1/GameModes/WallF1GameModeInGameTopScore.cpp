@@ -20,16 +20,12 @@ void AWallF1GameModeInGameTopScore::StartWallF1Game()
 	yellow.g = 255;
 	yellow.b = 0;
 
+	CachedSensorHandler->SetDetectionColorOfAllSensors(yellow);
+
 	CachedSensorHandler->SetSensorDetectionColor(1, red);
 	CachedSensorHandler->SetSensorDetectionColor(3, red);
 	CachedSensorHandler->SetSensorDetectionColor(7, red);
 	CachedSensorHandler->SetSensorDetectionColor(9, red);
-
-	CachedSensorHandler->SetSensorDetectionColor(2, yellow);
-	CachedSensorHandler->SetSensorDetectionColor(4, yellow);
-	CachedSensorHandler->SetSensorDetectionColor(5, yellow);
-	CachedSensorHandler->SetSensorDetectionColor(6, yellow);
-	CachedSensorHandler->SetSensorDetectionColor(8, yellow);
 
 	CachedSensorHandler->EnableAllSensorsDetection();
 }

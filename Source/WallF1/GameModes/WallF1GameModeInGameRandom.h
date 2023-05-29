@@ -13,9 +13,17 @@ UCLASS()
 class WALLF1_API AWallF1GameModeInGameRandom : public AWallF1GameModeInGameBase
 {
 	GENERATED_BODY()
-	
+
+public:
 	AWallF1GameModeInGameRandom();
 
 	void StartWallF1Game() override;
 	void HandleSensorDetection(int SensorId) override;
+
+private:
+	FTimerHandle DetectionTimeout;
+
+private:
+	void EnableRandomSensor();
+	void HandleTimout();
 };

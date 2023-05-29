@@ -222,8 +222,11 @@ void UWallF1SensorHandler::OnMessageReceived(FString Payload)
 		FWallF1SensorResponse SensorResponse;
 		FJsonObjectConverter::JsonObjectStringToUStruct(Payload, &SensorResponse);
 
-		// Broadcast delegate
-		OnSensorDetection.Broadcast(SensorResponse.idSensor);
+		// Broadcast delegate if detection is enabled (filter out detections on sensor that are pending to be disabled)
+		if (SensorsState[SensorResponse.idSensor - 1] == EWallF1SensorState::DETECTION_ENABLED) 
+		{
+			OnSensorDetection.Broadcast(SensorResponse.idSensor);
+		}
 	}
 }
 
