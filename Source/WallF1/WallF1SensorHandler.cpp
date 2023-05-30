@@ -268,7 +268,6 @@ void UWallF1SensorHandler::PurgePendingMessageQueue()
 
 void UWallF1SensorHandler::TrytoPublishPendingMessage()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Name of the instance: %s"), *this->GetName())
 	if (ready && !PendingMessageQueue.IsEmpty() && !PendingMessageQueue[0].bPublishRequested)
 	{
 		const FString PayloadString = PendingMessageQueue[0].Payload;

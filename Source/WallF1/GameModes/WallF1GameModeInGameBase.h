@@ -6,6 +6,7 @@
 #include "../WallF1SensorHandler.h"
 #include "WallF1GameModeInGameBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInGameTimer, int, minutes, int, seconds);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownUpdate, uint8, CurrentCountdown);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnScoreIncreased);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStandBy);
@@ -13,8 +14,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeviceActive);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOver);
 
 class UUserWidget;
-
-
 
 /**
  * Base clase for WallF1 games
@@ -35,6 +34,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCountdownUpdate OnCountdownUpdate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInGameTimer OnInGameTimer;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnScoreIncreased OnScoreIncreased;
@@ -77,9 +79,12 @@ private:
 	int Score = 0;
 	int RankingPosition = -1;
 	FTimerHandle GameStartCountdown;
-	FTimerHandle GameOverTimer;
+	FTimerHandle InGameTimer;
 	FTimerHandle StandByTimer;
 
+	int SecondsInGame = 0;
+
+private:
 	void StartPlay() override;
 	void PlayCountdownAnimation();
 	void StartGameModeSelection();
@@ -88,4 +93,7 @@ private:
 
 	UFUNCTION()
 	void HandleCountdownStep();
+
+	UFUNCTION()
+	void HandleInGameTimerStep();
 };

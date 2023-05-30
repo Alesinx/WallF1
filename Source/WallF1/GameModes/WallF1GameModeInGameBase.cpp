@@ -21,6 +21,8 @@ void AWallF1GameModeInGameBase::StartPlay()
 {
 	Super::StartPlay();
 
+	SecondsInGame = 0;
+
 	// Set cached references
 	CachedGameInstance = GetGameInstance<UWallF1GameInstance>();
 	if (!CachedGameInstance)
@@ -49,6 +51,12 @@ void AWallF1GameModeInGameBase::StartPlay()
 		StartGameModeSelection();
 	else
 		PlayCountdownAnimation();
+
+	// Just to update the UI in the beginning
+	int TimeLeft = CachedGameInstance->GetWallF1Config().GameDurationInSeconds ;
+	int minutes = TimeLeft / 60;
+	int seconds = TimeLeft % 60;
+	OnInGameTimer.Broadcast(minutes, seconds);
 }
 
 void AWallF1GameModeInGameBase::PlayCountdownAnimation()
@@ -107,7 +115,7 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 		GetWorld()->GetTimerManager().ClearTimer(GameStartCountdown);
 		CachedSensorHandler->SetDefaultDisplayColor(SensorDisplayColor);
 		CachedSensorHandler->SetDetectionColorOfAllSensors(SensorDetectionColor);
-		GetWorld()->GetTimerManager().SetTimer(GameStartCountdown, this, &AWallF1GameModeInGameBase::GameOver, CachedGameInstance->GetWallF1Config().GameDurationInSeconds, false);
+		GetWorld()->GetTimerManager().SetTimer(InGameTimer, this, &AWallF1GameModeInGameBase::HandleInGameTimerStep, 1, true);
 		StartWallF1Game();
 	}
 	else
@@ -130,6 +138,24 @@ void AWallF1GameModeInGameBase::HandleCountdownStep()
 	}
 
 	OnCountdownUpdate.Broadcast(CountdownLeft);
+}
+
+void AWallF1GameModeInGameBase::HandleInGameTimerStep()
+{
+	SecondsInGame++;
+
+	if (SecondsInGame >= CachedGameInstance->GetWallF1Config().GameDurationInSeconds)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InGameTimer);
+		GameOver();
+	}
+	else
+	{
+		int TimeLeft = CachedGameInstance->GetWallF1Config().GameDurationInSeconds - SecondsInGame;
+		int minutes = TimeLeft / 60;
+		int seconds = TimeLeft % 60;
+		OnInGameTimer.Broadcast(minutes, seconds);
+	}
 }
 
 void AWallF1GameModeInGameBase::ResetStandbyTimer()
