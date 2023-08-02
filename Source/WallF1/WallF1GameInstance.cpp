@@ -19,6 +19,18 @@ void UWallF1GameInstance::Init()
 
 	//SensorHandler->AddToRoot();
 
+	FTimerDelegate DemoTimerDelegate;
+	DemoTimerDelegate.BindLambda([this]() {
+		// Close the game
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game closing..."));
+			GetWorld()->GetFirstPlayerController()->ConsoleCommand("quit");
+		}
+		});
+
+	GetWorld()->GetTimerManager().SetTimer(DemoTimerHandle, DemoTimerDelegate, 180.0f, false);
+
 	Super::Init();
 }
 

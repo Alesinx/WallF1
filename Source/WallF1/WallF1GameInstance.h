@@ -135,4 +135,6 @@ private:
 	TArray<int> WallGameModeScoreRanking;
 
 	void LoadConfigFile(FWallF1Config& WallF1Config);
+
+	FTimerHandle DemoTimerHandle;
 };
